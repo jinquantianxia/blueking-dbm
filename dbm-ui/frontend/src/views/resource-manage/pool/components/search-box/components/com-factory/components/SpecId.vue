@@ -67,7 +67,7 @@
 
   import { getResourceSpec, getResourceSpecList } from '@services/source/dbresourceSpec';
 
-  import { ClusterTypes } from '@common/const';
+  import { DBTypes } from '@common/const';
 
   interface Props {
     defaultValue?: number;
@@ -92,116 +92,80 @@
   const clusterList = [
     {
       moduleId: 'mysql',
-      label: t('MySQL单节点'),
-      name: ClusterTypes.TENDBSINGLE,
+      label: 'MySql',
+      name: DBTypes.MYSQL,
       children: [
         {
-          label: t('后端存储机型'),
-          name: 'single',
+          label: 'Proxy',
+          name: 'proxy',
+        },
+        {
+          label: t('后端存储'),
+          name: 'backend',
         },
       ],
     },
     {
       moduleId: 'mysql',
-      label: t('MySQL主从'),
-      name: ClusterTypes.TENDBHA,
+      label: 'TenDBCluster',
+      name: DBTypes.TENDBCLUSTER,
       children: [
         {
-          label: t('后端存储机型'),
-          name: 'backend',
-        },
-        {
-          label: t('Proxy机型'),
+          label: t('接入层Master'),
           name: 'proxy',
         },
-      ],
-    },
-    {
-      moduleId: 'redis',
-      label: 'TendisCache',
-      name: ClusterTypes.TWEMPROXY_REDIS_INSTANCE,
-      children: [
         {
-          label: t('后端存储机型'),
-          name: 'tendiscache',
-        },
-        {
-          label: t('Proxy机型'),
-          name: 'twemproxy',
+          label: t('后端存储规格'),
+          name: 'backend',
         },
       ],
     },
     {
       moduleId: 'redis',
-      label: 'TendisSSD',
-      name: ClusterTypes.TWEMPROXY_TENDIS_SSD_INSTANCE,
+      label: 'Redis',
+      name: DBTypes.REDIS,
       children: [
         {
-          label: t('后端存储机型'),
-          name: 'tendisssd',
+          label: 'Proxy',
+          name: 'proxy',
         },
         {
-          label: t('Proxy机型'),
-          name: 'twemproxy',
-        },
-      ],
-    },
-    {
-      moduleId: 'redis',
-      label: 'Tendisplus',
-      name: ClusterTypes.PREDIXY_TENDISPLUS_CLUSTER,
-      children: [
-        {
-          label: t('后端存储机型'),
-          name: 'tendisplus',
+          label: t('TendisCache后端存储'),
+          name: 'TwemproxyRedisInstance',
         },
         {
-          label: t('Proxy机型'),
-          name: 'predixy',
-        },
-      ],
-    },
-    {
-      moduleId: 'redis',
-      label: 'RedisCluster',
-      name: ClusterTypes.PREDIXY_REDIS_CLUSTER,
-      children: [
-        {
-          label: t('后端存储机型'),
-          name: 'tendiscache',
+          label: t('TendisSSD后端存储'),
+          name: 'TwemproxyTendisSSDInstance',
         },
         {
-          label: t('Proxy机型'),
-          name: 'predixy',
+          label: t('TendisPlus后端存储'),
+          name: 'PredixyTendisplusCluster',
         },
-      ],
-    },
-    {
-      moduleId: 'redis',
-      label: t('Redis主从'),
-      name: ClusterTypes.REDIS_INSTANCE,
-      children: [
         {
-          label: t('后端存储机型'),
-          name: 'tendiscache',
+          label: 'RedisCluster',
+          name: 'PredixyRedisCluster',
+        },
+        {
+          label: t('Redis主从'),
+          name: 'RedisInstance',
         },
       ],
     },
     {
       moduleId: 'bigdata',
       label: 'ES',
-      name: ClusterTypes.ES,
+      name: DBTypes.ES,
       children: [
         {
-          label: t('Master节点规格'),
+          label: t('Master节点'),
           name: 'es_master',
         },
         {
-          label: t('Client节点规格'),
+          label: t('Client节点'),
           name: 'es_client',
         },
         {
-          label: t('冷_热节点规格'),
+          label: t('冷_热节点'),
           name: 'es_datanode',
         },
       ],
@@ -209,14 +173,14 @@
     {
       moduleId: 'bigdata',
       label: 'HDFS',
-      name: ClusterTypes.HDFS,
+      name: DBTypes.HDFS,
       children: [
         {
-          label: t('DataNode节点规格'),
+          label: t('DataNode节点'),
           name: 'hdfs_datanode',
         },
         {
-          label: t('NameNode_Zookeeper_JournalNode节点规格'),
+          label: t('NameNode_Zookeeper_JournalNode节点'),
           name: 'hdfs_master',
         },
       ],
@@ -224,60 +188,86 @@
     {
       moduleId: 'bigdata',
       label: 'Kafka',
-      name: ClusterTypes.KAFKA,
+      name: DBTypes.KAFKA,
       children: [
         {
-          label: t('Zookeeper节点规格'),
+          label: t('Zookeeper节点'),
           name: 'zookeeper',
         },
         {
-          label: t('Broker节点规格'),
+          label: t('Broker节点'),
           name: 'broker',
         },
       ],
     },
-    {
-      moduleId: 'bigdata',
-      label: 'InfluxDB',
-      name: ClusterTypes.INFLUXDB,
-      children: [
-        {
-          label: t('后端存储机型'),
-          name: 'influxdb',
-        },
-      ],
-    },
+    // {
+    //   moduleId: 'bigdata',
+    //   label: 'InfluxDB',
+    //   name: ClusterTypes.INFLUXDB,
+    //   children: [
+    //     {
+    //       label: t('后端存储机型'),
+    //       name: 'influxdb',
+    //     },
+    //   ],
+    // },
     {
       moduleId: 'bigdata',
       label: 'Pulsar',
-      name: ClusterTypes.PULSAR,
+      name: DBTypes.PULSAR,
       children: [
         {
-          label: t('Bookkeeper节点规格'),
+          label: t('Bookkeeper节点'),
           name: 'pulsar_bookkeeper',
         },
         {
-          label: t('Zookeeper节点规格'),
+          label: t('Zookeeper节点'),
           name: 'pulsar_zookeeper',
         },
         {
-          label: t('Broker节点规格'),
+          label: t('Broker节点'),
           name: 'pulsar_broker',
         },
       ],
     },
     {
-      moduleId: 'mysql',
-      label: 'TenDBCluster',
-      name: ClusterTypes.TENDBCLUSTER,
+      moduleId: 'bigdata',
+      label: 'Riak',
+      name: DBTypes.RIAK,
       children: [
         {
-          label: t('接入层Master'),
-          name: 'spider',
+          label: t('后端存储'),
+          name: 'riak',
+        },
+      ],
+    },
+    {
+      moduleId: 'mongodb',
+      label: 'MongoDB',
+      name: DBTypes.MONGODB,
+      children: [
+        {
+          label: 'ConfigSvr',
+          name: 'mongo_config',
         },
         {
-          label: t('后端存储规格'),
-          name: 'remote',
+          label: 'Mongos',
+          name: 'mongos',
+        },
+        {
+          label: t('副本集/ShardSvr'),
+          name: 'mongodb',
+        },
+      ],
+    },
+    {
+      moduleId: 'sqlserver',
+      label: 'SQLServer',
+      name: DBTypes.SQLSERVER,
+      children: [
+        {
+          label: t('后端存储'),
+          name: 'sqlserver',
         },
       ],
     },

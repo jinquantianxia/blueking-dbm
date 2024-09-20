@@ -137,7 +137,7 @@
         changeBySelect = false;
         return;
       }
-      collectSelectRef.value.handleClear({
+      collectSelectRef.value?.handleClear({
         stopPropagation: () => undefined,
       });
     },
@@ -225,7 +225,7 @@
   const handleRemove = (payload: { name: string }) => {
     const result = _.filter(list.value, (item) => item.name !== payload.name);
     if (collectName.value === payload.name) {
-      collectSelectRef.value.handleClear({
+      collectSelectRef.value?.handleClear({
         stopPropagation: () => undefined,
       });
     }

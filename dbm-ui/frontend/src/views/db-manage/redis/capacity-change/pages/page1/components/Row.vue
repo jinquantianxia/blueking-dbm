@@ -22,7 +22,7 @@
     </td>
     <td style="padding: 0">
       <RenderText
-        :data="data.cluster_type_name"
+        :data="data.clusterTypeName"
         :is-loading="data.isLoading"
         :placeholder="$t('选择集群后自动生成')" />
     </td>
@@ -75,7 +75,7 @@
   </tr>
 </template>
 <script lang="ts">
-  import RedisModel, { RedisClusterTypes } from '@services/model/redis/redis';
+  import RedisModel from '@services/model/redis/redis';
 
   import OperateColumn from '@components/render-table/columns/operate-column/index.vue';
   import RenderText from '@components/render-table/columns/text-plain/index.vue';
@@ -96,7 +96,7 @@
     targetCluster: string;
     clusterId: number;
     bkCloudId: number;
-    cluster_type_name: string;
+    clusterTypeName: string;
     shardNum?: number;
     groupNum?: number;
     currentSepc?: string;
@@ -110,7 +110,7 @@
       total: number;
     };
     version?: string;
-    clusterType?: RedisClusterTypes;
+    clusterType?: string;
     switchMode?: OnlineSwitchType;
   }
 
@@ -139,7 +139,7 @@
     targetCluster: '',
     clusterId: 0,
     bkCloudId: 0,
-    cluster_type_name: '',
+    clusterTypeName: '',
   });
 </script>
 <script setup lang="ts">

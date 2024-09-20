@@ -120,7 +120,7 @@
           ...params,
         }),
     },
-  };
+  } as any;
 
   // 检测列表是否为空
   const checkListEmpty = (list: Array<IDataRow>) => {
@@ -139,11 +139,11 @@
     currentSepc: data.cluster_spec.spec_name,
     clusterId: data.id,
     bkCloudId: data.bk_cloud_id,
-    cluster_type_name: data.cluster_type_name,
+    clusterTypeName: data.cluster_type_name,
     shardNum: data.cluster_shard_num,
     groupNum: data.machine_pair_cnt,
     version: data.major_version,
-    clusterType: data.cluster_spec.spec_cluster_type,
+    clusterType: data.cluster_type,
     currentCapacity: {
       used: 1,
       total: data.cluster_capacity,
