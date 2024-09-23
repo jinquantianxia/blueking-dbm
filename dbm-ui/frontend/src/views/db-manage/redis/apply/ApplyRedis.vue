@@ -272,7 +272,7 @@
                       :city="state.formdata.details.city_code"
                       :cloud-id="state.formdata.details.bk_cloud_id"
                       :cluster-type="DBTypes.REDIS"
-                      :machine-type="state.formdata.details.cluster_type"
+                      machine-type="proxy"
                       style="width: 314px" />
                   </BkFormItem>
                   <BkFormItem
