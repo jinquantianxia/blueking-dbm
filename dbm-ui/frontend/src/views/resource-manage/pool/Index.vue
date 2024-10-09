@@ -133,17 +133,17 @@
       label: 'IP',
       field: 'ip',
       fixed: 'left',
-      with: 120,
+      width: 135,
     },
     {
       label: t('管控区域'),
       field: 'bk_cloud_name',
-      with: 120,
+      width: 100,
     },
     {
       label: t('Agent 状态'),
       field: 'agent_status',
-      with: 100,
+      width: 100,
       render: ({ data }: {data: DbResourceModel}) => <HostAgentStatus data={data.agent_status} />,
     },
     {
@@ -200,6 +200,7 @@
     {
       label: t('内存'),
       field: 'bkMemText',
+      width: 100,
       render: ({ data }: {data: DbResourceModel}) => data.bkMemText || '0 M',
     },
     {
@@ -217,6 +218,7 @@
     {
       label: t('操作'),
       field: 'id',
+      fixed: 'right',
       width: 100,
       render: ({ data }: {data: DbResourceModel}) => (
         <db-popconfirm
