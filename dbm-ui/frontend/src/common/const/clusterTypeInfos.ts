@@ -31,8 +31,12 @@ const mysql: InfoType = {
     moduleId: 'mysql',
     machineList: [
       {
-        id: MachineTypes.SINGLE,
-        name: t('后端存储机型'),
+        id: MachineTypes.MYSQL_PROXY,
+        name: 'Proxy',
+      },
+      {
+        id: MachineTypes.MYSQL_BACKEND,
+        name: t('后端存储'),
       },
     ],
   },
@@ -43,12 +47,12 @@ const mysql: InfoType = {
     moduleId: 'mysql',
     machineList: [
       {
-        id: MachineTypes.BACKEND,
-        name: t('后端存储机型'),
+        id: MachineTypes.MYSQL_PROXY,
+        name: 'Proxy',
       },
       {
-        id: MachineTypes.PROXY,
-        name: t('Proxy机型'),
+        id: MachineTypes.MYSQL_BACKEND,
+        name: t('后端存储'),
       },
     ],
   },
@@ -62,12 +66,12 @@ const spider: InfoType = {
     moduleId: 'mysql',
     machineList: [
       {
-        id: MachineTypes.SPIDER,
+        id: MachineTypes.TENDBCLUSTER_PROXY,
         name: t('接入层Master'),
       },
       {
-        id: MachineTypes.REMOTE,
-        name: t('后端存储规格'),
+        id: MachineTypes.TENDBCLUSTER_BACKEND,
+        name: t('后端存储'),
       },
     ],
   },
@@ -81,12 +85,12 @@ const redis: InfoType = {
     moduleId: 'redis',
     machineList: [
       {
-        id: MachineTypes.TENDISCACHE,
-        name: t('后端存储机型'),
+        id: MachineTypes.REDIS_TENDIS_CACHE,
+        name: t('后端存储'),
       },
       {
-        id: MachineTypes.TWEMPROXY,
-        name: t('Proxy机型'),
+        id: MachineTypes.REDIS_PROXY,
+        name: 'Proxy',
       },
     ],
   },
@@ -97,12 +101,12 @@ const redis: InfoType = {
     moduleId: 'redis',
     machineList: [
       {
-        id: MachineTypes.TENDISSSD,
-        name: t('后端存储机型'),
+        id: MachineTypes.REDIS_TENDIS_SSD,
+        name: t('后端存储'),
       },
       {
-        id: MachineTypes.TWEMPROXY,
-        name: t('Proxy机型'),
+        id: MachineTypes.REDIS_PROXY,
+        name: 'Proxy',
       },
     ],
   },
@@ -113,12 +117,12 @@ const redis: InfoType = {
     moduleId: 'redis',
     machineList: [
       {
-        id: MachineTypes.TENDISPLUS,
-        name: t('后端存储机型'),
+        id: MachineTypes.REDIS_TENDIS_PLUS,
+        name: t('后端存储'),
       },
       {
-        id: MachineTypes.PREDIXY,
-        name: t('Proxy机型'),
+        id: MachineTypes.REDIS_PROXY,
+        name: 'Proxy',
       },
     ],
   },
@@ -129,12 +133,12 @@ const redis: InfoType = {
     moduleId: 'redis',
     machineList: [
       {
-        id: MachineTypes.TENDISCACHE,
-        name: t('后端存储机型'),
+        id: MachineTypes.REDIS_CLUSTER,
+        name: t('后端存储'),
       },
       {
-        id: MachineTypes.PREDIXY,
-        name: t('Proxy机型'),
+        id: MachineTypes.REDIS_PROXY,
+        name: 'Proxy',
       },
     ],
   },
@@ -145,8 +149,8 @@ const redis: InfoType = {
     moduleId: 'redis',
     machineList: [
       {
-        id: MachineTypes.TENDISCACHE,
-        name: t('后端存储机型'),
+        id: MachineTypes.REDIS_INSTANCE,
+        name: t('后端存储'),
       },
     ],
   },
@@ -161,15 +165,15 @@ const bigdata: InfoType = {
     machineList: [
       {
         id: MachineTypes.ES_MASTER,
-        name: t('Master节点规格'),
+        name: t('Master节点'),
       },
       {
         id: MachineTypes.ES_CLIENT,
-        name: t('Client节点规格'),
+        name: t('Client节点'),
       },
       {
         id: MachineTypes.ES_DATANODE,
-        name: t('冷_热节点规格'),
+        name: t('冷_热节点'),
       },
     ],
   },
@@ -180,12 +184,12 @@ const bigdata: InfoType = {
     moduleId: 'bigdata',
     machineList: [
       {
-        id: MachineTypes.ZOOKEEPER,
-        name: t('Zookeeper节点规格'),
+        id: MachineTypes.KAFKA_ZOOKEEPER,
+        name: t('Zookeeper节点'),
       },
       {
-        id: MachineTypes.BROKER,
-        name: t('Broker节点规格'),
+        id: MachineTypes.KAFKA_BROKER,
+        name: t('Broker节点'),
       },
     ],
   },
@@ -197,11 +201,11 @@ const bigdata: InfoType = {
     machineList: [
       {
         id: MachineTypes.HDFS_DATANODE,
-        name: t('DataNode节点规格'),
+        name: t('DataNode节点'),
       },
       {
         id: MachineTypes.HDFS_MASTER,
-        name: t('NameNode_Zookeeper_JournalNode节点规格'),
+        name: t('NameNode_Zookeeper_JournalNode节点'),
       },
     ],
   },
@@ -225,15 +229,15 @@ const bigdata: InfoType = {
     machineList: [
       {
         id: MachineTypes.PULSAR_BOOKKEEPER,
-        name: t('Bookkeeper节点规格'),
+        name: t('Bookkeeper节点'),
       },
       {
         id: MachineTypes.PULSAR_ZOOKEEPER,
-        name: t('Zookeeper节点规格'),
+        name: t('Zookeeper节点'),
       },
       {
         id: MachineTypes.PULSAR_BROKER,
-        name: t('Broker节点规格'),
+        name: t('Broker节点'),
       },
     ],
   },
@@ -248,7 +252,7 @@ const mongodb: InfoType = {
     machineList: [
       {
         id: MachineTypes.MONGODB,
-        name: t('Mongodb规格'),
+        name: t('Mongodb'),
       },
     ],
   },
@@ -260,15 +264,15 @@ const mongodb: InfoType = {
     machineList: [
       {
         id: MachineTypes.MONGOS,
-        name: t('Mongos规格'),
+        name: t('Mongos'),
       },
       {
         id: MachineTypes.MONGODB,
-        name: t('ConfigSvr规格'),
+        name: t('ConfigSvr'),
       },
       {
         id: MachineTypes.MONGO_CONFIG,
-        name: t('ShardSvr规格'),
+        name: t('ShardSvr'),
       },
     ],
   },
@@ -282,8 +286,8 @@ const sqlserver: InfoType = {
     moduleId: 'sqlserver',
     machineList: [
       {
-        id: MachineTypes.SQLSERVER_SINGLE,
-        name: t('单节点规格'),
+        id: MachineTypes.SQLSERVER,
+        name: t('后端存储'),
       },
     ],
   },
@@ -294,8 +298,8 @@ const sqlserver: InfoType = {
     moduleId: 'sqlserver',
     machineList: [
       {
-        id: MachineTypes.SQLSERVER_HA,
-        name: t('主从规格'),
+        id: MachineTypes.SQLSERVER,
+        name: t('后端存储'),
       },
     ],
   },
