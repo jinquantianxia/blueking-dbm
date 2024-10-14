@@ -13,7 +13,7 @@
 
 <template>
   <div class="spec-device spec-form-item">
-    <div class="spec-form-item__content">
+    <div class="spec-form-item-content">
       <BkFormItem
         property="device_class"
         required
@@ -78,7 +78,9 @@
             {{
               item === '-1'
                 ? t('无限制')
-                : `${item}（${deviceListMap[item]?.cpu}${t('核')}${deviceListMap[item]?.mem}G）`
+                : deviceListMap[item]?.cpu
+                  ? `${item}（${deviceListMap[item]?.cpu}${t('核')}${deviceListMap[item]?.mem}G）`
+                  : `${item}`
             }}
           </BkTag>
         </div>
@@ -142,7 +144,7 @@
   let isAppend = false;
 
   const { loading: isLoading, run: getDeviceClassList } = useRequest(fetchDeviceClass, {
-    defaultParams: [searchParams],
+    manual: true,
     onSuccess(data) {
       scrollLoading.value = false;
       const deviceList: DeviceClassListItem[] = [];
@@ -167,6 +169,22 @@
       deviceClassList.value = deviceList;
     },
   });
+
+  watch(
+    () => modelValue.value,
+    () => {
+      if (modelValue.value.length > 0 && modelValue.value[0] !== '-1') {
+        // 批量查询已选中的机型
+        searchParams.name = modelValue.value.join(',');
+        getDeviceClassList(searchParams);
+        searchParams.name = '';
+        return;
+      }
+
+      getDeviceClassList(searchParams);
+    },
+    { immediate: true },
+  );
 
   const handleTagClose = (index: number) => {
     if (props.isEdit) {

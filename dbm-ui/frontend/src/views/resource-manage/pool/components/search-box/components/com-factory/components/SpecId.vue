@@ -305,7 +305,8 @@
     defaultValue,
     () => {
       if (defaultValue.value === undefined) {
-        (currentCluster.value = ''), (currentMachine.value = '');
+        currentCluster.value = '';
+        currentMachine.value = '';
       } else if (!currentCluster.value && !currentMachine.value && defaultValue.value) {
         // 通过规格ID获取规格详情
         fetchResourceSpecDetail({

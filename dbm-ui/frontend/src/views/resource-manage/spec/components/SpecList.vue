@@ -210,24 +210,28 @@
             {{
               default: () => (
                 <div class="machine-info text-overflow">
-                  <bk-tag class="machine-info-cpu">
-                    CPU = {`${data.cpu.min} ~ ${data.cpu.max}`} {t('核')}
-                  </bk-tag>
-                  <bk-tag class="machine-info-condition" theme="info">
-                    AND
-                  </bk-tag>
-                  <bk-tag class="machine-info-mem">
-                    {t('内存')} = {`${data.mem.min} ~ ${data.mem.max}`} G
-                  </bk-tag>
-                  <bk-tag class="machine-info-condition" theme="info">
-                    AND
-                  </bk-tag>
-                  <bk-tag class="machine-info-device">
-                    {t('机型')} = {data.device_class.join(',') || t('无限制')}
-                  </bk-tag>
-                  <bk-tag class="machine-info-condition" theme="info">
-                    AND
-                </bk-tag>
+                  {data.device_class.length === 0 && data.cpu.min !== '' && <>
+                    <bk-tag class="machine-info-cpu">
+                      CPU = {`${data.cpu.min} ~ ${data.cpu.max}`} {t('核')}
+                    </bk-tag>
+                    <bk-tag class="machine-info-condition" theme="info">
+                      AND
+                    </bk-tag>
+                    <bk-tag class="machine-info-mem">
+                      {t('内存')} = {`${data.mem.min} ~ ${data.mem.max}`} G
+                    </bk-tag>
+                    <bk-tag class="machine-info-condition" theme="info">
+                      AND
+                    </bk-tag>
+                  </>}
+                  {((data.device_class.length === 0 && data.cpu.min === '') || data.device_class.length > 0) && <>
+                    <bk-tag class="machine-info-device">
+                      {t('机型')} = {data.device_class.join(',') || t('无限制')}
+                    </bk-tag>
+                    <bk-tag class="machine-info-condition" theme="info">
+                      AND
+                    </bk-tag>
+                  </>}
                   <bk-tag class="machine-info-storage">
                     {t('磁盘')} = {
                       data.storage_spec.length > 0

@@ -15,31 +15,31 @@
   <BkLoading :loading="isResourceSpecLoading">
     <BkComposeFormItem class="search-spec-id">
       <BkSelect
-        v-model="currentCluster"
+        v-model="currentDbType"
         :clearable="false"
         filterable
         :input-search="false"
         style="width: 150px"
         @change="handleClusterChange">
         <BkOption
-          v-for="item in Object.values(clusterTypeInfos)"
+          v-for="item in Object.values(DBTypeInfos)"
           :key="item.id"
           :label="item.name"
           :value="item.id" />
       </BkSelect>
       <BkSelect
-        :key="currentCluster"
+        :key="currentDbType"
         v-model="currentMachine"
         :clearable="false"
-        :disabled="!currentCluster"
+        :disabled="!currentDbType"
         filterable
         :input-search="false"
         style="width: 150px">
         <BkOption
           v-for="item in clusterMachineList"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id" />
+          :key="item.value"
+          :label="item.label"
+          :value="item.value" />
       </BkSelect>
       <BkSelect
         :key="currentMachine"
@@ -66,7 +66,7 @@
 
   import { getResourceSpec, getResourceSpecList } from '@services/source/dbresourceSpec';
 
-  import { type ClusterTypeInfoItem, clusterTypeInfos, ClusterTypes } from '@common/const';
+  import { DBTypeInfos, DBTypes, type InfoItem } from '@common/const';
 
   interface Props {
     defaultValue?: number | string;
@@ -93,17 +93,17 @@
   // 临时修复 bk-select 无法重置的问题
   const rerenderKey = ref(0);
 
-  const currentCluster = ref('');
+  const currentDbType = ref('');
   const currentMachine = ref('');
-  const clusterMachineList = shallowRef<ClusterTypeInfoItem['machineList']>([]);
+  const clusterMachineList = shallowRef<InfoItem['machineList']>([]);
 
   const { loading: isResourceSpecLoading, run: fetchResourceSpecDetail } = useRequest(getResourceSpec, {
     manual: true,
     onSuccess(data) {
       const { spec_cluster_type: clusterType, spec_machine_type: machineType } = data;
-      currentCluster.value = clusterType;
+      currentDbType.value = clusterType;
       currentMachine.value = machineType;
-      clusterMachineList.value = clusterTypeInfos[clusterType]?.machineList || [];
+      clusterMachineList.value = DBTypeInfos[clusterType as unknown as DBTypes]?.machineList || [];
     },
   });
 
@@ -135,7 +135,7 @@
     () => {
       if (currentMachine.value) {
         fetchResourceSpecList({
-          spec_cluster_type: currentCluster.value,
+          spec_cluster_type: currentDbType.value,
           spec_machine_type: currentMachine.value,
           limit: -1,
         });
@@ -146,8 +146,8 @@
     },
   );
 
-  const handleClusterChange = (value: ClusterTypes) => {
-    clusterMachineList.value = clusterTypeInfos[value]?.machineList || [];
+  const handleClusterChange = (value: DBTypes) => {
+    clusterMachineList.value = DBTypeInfos[value]?.machineList || [];
     currentMachine.value = '';
     defaultValue.value = '';
   };
@@ -160,7 +160,8 @@
   defineExpose<Expose>({
     reset() {
       rerenderKey.value = Date.now();
-      (currentCluster.value = ''), (currentMachine.value = '');
+      currentDbType.value = '';
+      currentMachine.value = '';
       clusterMachineList.value = [];
     },
   });

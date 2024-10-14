@@ -13,10 +13,10 @@
 
 <template>
   <div class="spec-mem spec-form-item">
-    <div class="spec-form-item__label">
+    <div class="spec-form-item-label">
       {{ t('机型') }}
     </div>
-    <div class="spec-form-item__content">
+    <div class="spec-form-item-content">
       <BkFormItem
         property="device_class"
         required

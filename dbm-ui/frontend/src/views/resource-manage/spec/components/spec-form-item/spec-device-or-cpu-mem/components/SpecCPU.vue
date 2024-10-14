@@ -13,7 +13,7 @@
 
 <template>
   <div class="spec-cpu spec-form-item mb-0">
-    <div class="spec-form-item__content">
+    <div class="spec-form-item-content">
       <BkFormItem
         property="cpu.min"
         required>
@@ -34,7 +34,7 @@
             @change="handleLimitChange('min')" />
         </span>
       </BkFormItem>
-      <span class="spec-form-item__desc">{{ t('至') }}</span>
+      <span class="spec-form-item-desc">{{ t('至') }}</span>
       <BkFormItem
         property="cpu.max"
         required>
@@ -55,7 +55,7 @@
             @change="handleLimitChange('max')" />
         </span>
       </BkFormItem>
-      <span class="spec-form-item__desc">{{ t('核') }}</span>
+      <span class="spec-form-item-desc">{{ t('核') }}</span>
     </div>
   </div>
 </template>

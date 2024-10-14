@@ -12,44 +12,42 @@
 -->
 
 <template>
-  <div class="spec-mem spec-form-item">
-    <div class="spec-form-item__label">
-      <BkDropdown
-        :disabled="isEdit"
-        placement="bottom"
-        trigger="click"
-        @hide="handleHidePopover">
-        <div
-          v-bk-tooltips="{
-            content: t('不支持修改'),
-            disabled: !isEdit,
-          }"
-          class="operation-more-main"
-          @click="handleClickMore">
-          <BkButton
-            class="mr-4"
-            text>
-            {{ currentTitle }}
-          </BkButton>
-          <DbIcon
-            class="more-icon"
-            :class="{
-              'more-icon-active': isRotate,
-              'icon-disabled': isEdit,
+  <div class="spec-device-or-mem spec-form-item">
+    <div class="spec-form-item-label device-or-mem-label">
+      <BkSelect
+        v-model="currentType"
+        :filterable="false"
+        @change="handleChooseType"
+        @toggle="handleTogglePopover">
+        <template #trigger>
+          <div
+            v-bk-tooltips="{
+              content: t('不支持修改'),
+              disabled: !isEdit,
             }"
-            type="down-shape" />
-        </div>
-        <template #content>
-          <BkDropdownMenu>
-            <BkDropdownItem
-              v-for="(item, index) in titleList"
-              :key="index"
-              @click="() => handleChooseType(item.value)"
-              >{{ item.title }}</BkDropdownItem
-            >
-          </BkDropdownMenu>
+            class="operation-more-main">
+            <span class="label-content">
+              <BkButton
+                class="mr-4"
+                text>
+                {{ currentTitle }}
+              </BkButton>
+              <DbIcon
+                class="more-icon"
+                :class="{
+                  'more-icon-active': isRotate,
+                  'icon-disabled': isEdit,
+                }"
+                type="down-shape" />
+            </span>
+          </div>
         </template>
-      </BkDropdown>
+        <BkOption
+          v-for="(item, index) in titleList"
+          :id="item.value"
+          :key="index"
+          :name="item.title" />
+      </BkSelect>
     </div>
     <SpecDevice
       v-if="currentType === 'device_class'"
@@ -83,7 +81,7 @@
     getCurrentType: () => string;
   }
 
-  const props = withDefaults(defineProps<Props>(), {
+  withDefaults(defineProps<Props>(), {
     isEdit: false,
   });
 
@@ -132,16 +130,8 @@
     },
   );
 
-  const handleClickMore = () => {
-    if (props.isEdit) {
-      return;
-    }
-
-    isRotate.value = !isRotate.value;
-  };
-
-  const handleHidePopover = () => {
-    isRotate.value = false;
+  const handleTogglePopover = (isShow: boolean) => {
+    isRotate.value = isShow;
   };
 
   const handleChooseType = (value: string) => {
@@ -162,23 +152,47 @@
 <style lang="less" scoped>
   @import '../specFormItem.less';
 
+  .spec-device-or-mem {
+    .device-or-mem-label {
+      &::after {
+        display: none;
+      }
+    }
+  }
+
   .operation-more-main {
     display: flex;
     color: #63656e;
     cursor: pointer;
     align-items: center;
 
-    .more-icon {
-      transform: rotate(0deg);
-      transition: all 0.5s;
-    }
+    .label-content {
+      position: relative;
 
-    .more-icon-active {
-      transform: rotate(-180deg);
-    }
+      &::after {
+        position: absolute;
+        top: 1px;
+        right: -13px;
+        width: 14px;
+        font-weight: normal;
+        color: @danger-color;
+        text-align: center;
+        content: '*';
+      }
 
-    .icon-disabled {
-      color: #c4c6cc;
+      .more-icon {
+        display: inline-block;
+        transform: rotate(0deg);
+        transition: all 0.5s;
+      }
+
+      .more-icon-active {
+        transform: rotate(-180deg);
+      }
+
+      .icon-disabled {
+        color: #c4c6cc;
+      }
     }
   }
 

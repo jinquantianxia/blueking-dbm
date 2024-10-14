@@ -5,7 +5,7 @@ import { t } from '@locales/index';
 import { DBTypes } from './dbTypes';
 import { MachineTypes } from './machineTypes';
 
-interface InfoItem {
+export interface InfoItem {
   id: DBTypes;
   name: string;
   moduleId: ExtractedControllerDataKeys;
@@ -14,9 +14,11 @@ interface InfoItem {
     value: MachineTypes;
   }[];
 }
+
 type InfoType = {
   [x in DBTypes]?: InfoItem;
 };
+
 type RequiredInfoType = {
   [x in DBTypes]: InfoItem;
 };

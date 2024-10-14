@@ -252,7 +252,7 @@ const mongodb: InfoType = {
     machineList: [
       {
         id: MachineTypes.MONGODB,
-        name: t('Mongodb'),
+        name: 'Mongodb',
       },
     ],
   },
@@ -264,15 +264,15 @@ const mongodb: InfoType = {
     machineList: [
       {
         id: MachineTypes.MONGOS,
-        name: t('Mongos'),
+        name: 'Mongos',
       },
       {
         id: MachineTypes.MONGODB,
-        name: t('ConfigSvr'),
+        name: 'ConfigSvr',
       },
       {
         id: MachineTypes.MONGO_CONFIG,
-        name: t('ShardSvr'),
+        name: 'ShardSvr',
       },
     ],
   },
