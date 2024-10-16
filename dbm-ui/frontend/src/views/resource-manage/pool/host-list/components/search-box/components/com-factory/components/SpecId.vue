@@ -17,6 +17,7 @@
       <BkSelect
         v-model="currentDbType"
         :clearable="false"
+        :disabled="isDbTypeDisabled"
         filterable
         :input-search="false"
         style="width: 150px"
@@ -69,16 +70,20 @@
   import { DBTypeInfos, DBTypes, type InfoItem } from '@common/const';
 
   interface Props {
-    defaultValue?: number | string;
+    model: Record<string, any>;
   }
 
   interface Emits {
-    (e: 'change', value: Props['defaultValue']): void;
+    (e: 'change', value: ValueType): void;
   }
 
   interface Expose {
     reset: () => void;
   }
+
+  type ValueType = number | string;
+
+  const props = defineProps<Props>();
 
   const emits = defineEmits<Emits>();
 
@@ -86,7 +91,7 @@
     inheritAttrs: false,
   });
 
-  const defaultValue = defineModel<Props['defaultValue']>('defaultValue');
+  const defaultValue = defineModel<ValueType>('defaultValue');
 
   const { t } = useI18n();
 
@@ -96,6 +101,8 @@
   const currentDbType = ref('');
   const currentMachine = ref('');
   const clusterMachineList = shallowRef<InfoItem['machineList']>([]);
+
+  const isDbTypeDisabled = computed(() => props.model.resource_type && props.model.resource_type !== 'PUBLIC');
 
   const { loading: isResourceSpecLoading, run: fetchResourceSpecDetail } = useRequest(getResourceSpec, {
     manual: true,
@@ -146,13 +153,29 @@
     },
   );
 
+  watch(
+    () => props.model,
+    () => {
+      const dbType = props.model.resource_type;
+      if (dbType && dbType !== currentDbType.value && dbType !== 'PUBLIC') {
+        currentDbType.value = dbType;
+        clusterMachineList.value = DBTypeInfos[dbType as DBTypes]?.machineList || [];
+        currentMachine.value = '';
+        defaultValue.value = '';
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
+
   const handleClusterChange = (value: DBTypes) => {
     clusterMachineList.value = DBTypeInfos[value]?.machineList || [];
     currentMachine.value = '';
     defaultValue.value = '';
   };
 
-  const handleChange = (value: Props['defaultValue']) => {
+  const handleChange = (value: ValueType) => {
     defaultValue.value = value;
     emits('change', value);
   };

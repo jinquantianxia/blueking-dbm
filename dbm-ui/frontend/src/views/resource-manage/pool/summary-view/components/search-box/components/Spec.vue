@@ -2,6 +2,7 @@
   <BkComposeFormItem class="search-box-select-spec">
     <BkSelect
       v-model="dbType"
+      :disabled="isDbTypeDisabled"
       style="width: 150px"
       @change="handleChangeCluster">
       <BkOption
@@ -24,7 +25,7 @@
     </BkSelect>
     <BkSelect
       :key="machineType"
-      v-model:model-value="specIdList"
+      v-model="specIdList"
       collapse-tags
       :disabled="!machineType"
       :loading="isLoading"
@@ -73,6 +74,8 @@
   const specIdList = ref<string[]>([]);
   const clusterMachineList = ref<InfoItem['machineList']>([]);
 
+  const isDbTypeDisabled = computed(() => !!props.model.db_type && props.model.db_type !== 'PUBLIC');
+
   const {
     loading: isLoading,
     data: resourceSpecList,
@@ -84,10 +87,15 @@
   watch(
     () => props.model,
     () => {
-      if (props.model.cluster_type) {
-        dbType.value = props.model.cluster_type;
-        clusterMachineList.value = DBTypeInfos[props.model.cluster_type as DBTypes]?.machineList || [];
+      const modelDbType = props.model.db_type;
+      if (modelDbType && modelDbType !== dbType.value && modelDbType !== 'PUBLIC') {
+        dbType.value = modelDbType;
+        machineType.value = '';
+        specIdList.value = [];
+        clusterMachineList.value = DBTypeInfos[modelDbType as DBTypes]?.machineList || [];
+        return;
       }
+
       if (props.model.machine_type) {
         machineType.value = props.model.machine_type;
         fetchResourceSpecList({
@@ -96,6 +104,7 @@
           limit: -1,
         });
       }
+
       if (props.model.spec_id_list) {
         specIdList.value = props.model.spec_id_list.split(',');
       }
