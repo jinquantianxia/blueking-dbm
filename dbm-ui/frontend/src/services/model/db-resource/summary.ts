@@ -66,9 +66,12 @@ export default class Summary {
     if (!this.spec_cluster_type || !this.spec_machine_type) {
       return '--';
     }
-    const { name, machineList } = clusterTypeInfos[this.spec_cluster_type];
+    const { specClusterName, machineList } = clusterTypeInfos[this.spec_cluster_type] || {
+      specClusterName: '',
+      machineList: [],
+    };
     const matchMachine = machineList.find(({ id }) => id === this.spec_machine_type);
-    return matchMachine ? `${name} - ${matchMachine.name}` : '--';
+    return matchMachine ? `${specClusterName} - ${matchMachine.name}` : '--';
   }
 
   get subzoneDetailDisplay() {

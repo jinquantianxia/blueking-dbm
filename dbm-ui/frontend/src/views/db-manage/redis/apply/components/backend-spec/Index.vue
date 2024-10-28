@@ -110,7 +110,7 @@
   const specs = shallowRef<ClusterSpecModel[]>([]);
   const countMap = shallowRef({} as Record<number, number>)
 
-  const isTendisCache = computed(() => props.clusterType === ClusterTypes.TWEMPROXY_REDIS_INSTANCE);
+  const isTendisCache = computed(() => props.machineType === ClusterTypes.TWEMPROXY_REDIS_INSTANCE);
   const targetCapacityTitle = computed(() => (isTendisCache.value ? t('集群容量需求(内存容量)') : t('集群容量需求(磁盘容量)')));
   const futureCapacityTitle = computed(() => (isTendisCache.value ? t('未来集群容量需求(内存容量)') : t('未来集群容量需求(磁盘容量)')));
 
@@ -213,7 +213,7 @@
 
     isLoading.value = true;
     getFilterClusterSpec({
-      spec_cluster_type: props.clusterType,
+      spec_cluster_type: 'redis',
       spec_machine_type: props.machineType,
       capacity: Number(capacity),
       future_capacity: Number(futureCapacity),

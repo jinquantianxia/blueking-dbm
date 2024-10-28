@@ -18,12 +18,12 @@ import { utcDisplayTime } from '@utils';
 
 export default class ResourceSpec {
   cpu: {
-    max: number;
-    min: number;
+    max: number | string;
+    min: number | string;
   };
   mem: {
-    max: number;
-    min: number;
+    max: number | string;
+    min: number | string;
   };
   storage_spec: {
     mount_point: string;
