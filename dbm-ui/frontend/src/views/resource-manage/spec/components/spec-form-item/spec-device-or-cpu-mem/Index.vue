@@ -16,6 +16,7 @@
     <div class="spec-form-item-label device-or-mem-label">
       <BkSelect
         v-model="currentType"
+        :disabled="isEdit"
         :filterable="false"
         @change="handleChooseType"
         @toggle="handleTogglePopover">
@@ -116,9 +117,11 @@
   const currentTitle = computed(() => (currentType.value === 'device_class' ? titleList[0].title : titleList[1].title));
 
   watch(
-    cpuModelValue,
+    [deviceClassModelValue, cpuModelValue],
     () => {
-      if (cpuModelValue.value.max === '') {
+      const [firstDeviceClass] = deviceClassModelValue.value;
+      if (firstDeviceClass !== '-1' || (firstDeviceClass === '-1' && cpuModelValue.value.max === '')) {
+        // 优先展示机型
         currentType.value = titleList[0].value;
         return;
       }
