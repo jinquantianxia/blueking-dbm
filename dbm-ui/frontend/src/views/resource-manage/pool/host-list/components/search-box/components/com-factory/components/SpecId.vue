@@ -157,12 +157,14 @@
     () => props.model,
     () => {
       const dbType = props.model.resource_type;
-      if (dbType && dbType !== currentDbType.value && dbType !== 'PUBLIC') {
+      if (dbType && currentDbType.value && dbType !== currentDbType.value && dbType !== 'PUBLIC') {
         currentDbType.value = dbType;
         clusterMachineList.value = DBTypeInfos[dbType as DBTypes]?.machineList || [];
         currentMachine.value = '';
         defaultValue.value = '';
+        return;
       }
+      defaultValue.value = props.model.spec_id;
     },
     {
       immediate: true,
