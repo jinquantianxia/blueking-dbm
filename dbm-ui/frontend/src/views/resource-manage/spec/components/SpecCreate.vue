@@ -340,12 +340,12 @@
       if (type === 'device_class') {
         Object.assign(params, {
           cpu: {
-            min: '',
-            max: '',
+            min: 0,
+            max: 0,
           },
           mem: {
-            min: '',
-            max: '',
+            min: 0,
+            max: 0,
           },
         });
       } else {

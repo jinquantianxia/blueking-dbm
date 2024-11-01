@@ -120,7 +120,7 @@
     [deviceClassModelValue, cpuModelValue],
     () => {
       const [firstDeviceClass] = deviceClassModelValue.value;
-      if (firstDeviceClass !== '-1' || (firstDeviceClass === '-1' && cpuModelValue.value.max === '')) {
+      if (firstDeviceClass !== '-1' || (firstDeviceClass === '-1' && !cpuModelValue.value.max)) {
         // 优先展示机型
         currentType.value = titleList[0].value;
         return;
