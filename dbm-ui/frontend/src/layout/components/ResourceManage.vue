@@ -30,18 +30,6 @@
         </span>
       </BkMenuItem>
       <BkMenuItem
-        key="resourcePoolDirtyMachines"
-        v-db-console="'resourceManage.dirtyHostManage'">
-        <template #icon>
-          <DbIcon type="dirty-host" />
-        </template>
-        <span
-          v-overflow-tips.right
-          class="text-overflow">
-          {{ t('污点主机处理') }}
-        </span>
-      </BkMenuItem>
-      <BkMenuItem
         key="resourcePoolOperationRecord"
         v-db-console="'resourceManage.resourceOperationRecord'">
         <template #icon>
