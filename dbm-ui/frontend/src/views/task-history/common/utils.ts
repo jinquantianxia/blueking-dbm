@@ -43,7 +43,7 @@ export interface GraphLine {
   target: { id: string; x?: number; y?: number };
 }
 
-const getewayTypes: FlowType[] = [FlowTypes.ParallelGateway, FlowTypes.ConvergeGateway];
+export const getewayTypes: FlowType[] = [FlowTypes.ParallelGateway, FlowTypes.ConvergeGateway];
 const bothEndTypes: FlowType[] = [FlowTypes.EmptyStartEvent, FlowTypes.EmptyEndEvent];
 
 /**
@@ -82,10 +82,16 @@ const getLineTargets = (
   }
 
   const targetNode = nodeMap[flows[outgoing].target];
-
   if (getewayTypes.includes(targetNode.type)) {
-    return getLineTargets(targetNode, nodeMap, flows, false, targets);
+    // console.log('geteway targetNode = ', targetNode);
+    targets.push(targetNode.id);
+    return targets;
   }
+
+  // if (getewayTypes.includes(targetNode.type)) {
+  //   console.log('geteway targetNode = ', targetNode);
+  //   return getLineTargets(targetNode, nodeMap, flows, false, targets);
+  // }
   targets.push(targetNode.id);
   return targets;
 };
@@ -119,7 +125,8 @@ const formartLines = (data: FlowDetail, level = 0, lines: GraphLine[] = []) => {
      * 1. 如果是 geteway 节点则不处理
      * 2. 子流程 end 节点不处理
      */
-    if (getewayTypes.includes(node.type) || (node.type === FlowTypes.EmptyEndEvent && level > 0)) {
+    if (node.type === FlowTypes.EmptyEndEvent && level > 0) {
+      // if (getewayTypes.includes(node.type) || (node.type === FlowTypes.EmptyEndEvent && level > 0)) {
       continue;
     }
 
@@ -174,7 +181,9 @@ const formartLines = (data: FlowDetail, level = 0, lines: GraphLine[] = []) => {
  * }
  */
 export const formatGraphData = (data: FlowDetail, expandNodes: string[] = [], todoNodeIdList: string[] = []) => {
+  // console.log('expandNodes = ', expandNodes);
   const rootNodes = getLevelNodes(data, null, 0, expandNodes); // 所有根节点
+  console.log('rootNodes = ', rootNodes);
   const bothEndNodes = []; // 开始、结束根节点
   const roots = []; // 非开始、结束的根节点
   // 分离开始、结束根节点
@@ -201,9 +210,21 @@ export const formatGraphData = (data: FlowDetail, expandNodes: string[] = [], to
   const lines = formartLines(data);
   const renderLines = getRenderLines(lines, flagNodes);
 
+  // console.log('rootNodes = ', rootNodes);
+  // console.log('flagNodes = ', flagNodes);
+  const handledNodes = [];
+  const nodesMap: Record<string, number> = {};
+  flagNodes.forEach((node) => {
+    nodesMap[node.id] = nodesMap[node.id] ? nodesMap[node.id] + 1 : 1;
+    if (nodesMap[node.id] === 1) {
+      handledNodes.push(node);
+    }
+  });
+
+  // console.log('nodesMap = ', nodesMap);
   return reactive({
     lines: renderLines,
-    locations: flagNodes, // 渲染根节点
+    locations: handledNodes, // 渲染根节点
   });
 };
 
@@ -355,8 +376,15 @@ function getLevelNodes(
           const targetNode = nodesMap[flows[targetId].target];
           // 网关节点不处理
           const isGetewaysType = getewayTypes.includes(targetNode.type);
-          !isGetewaysType &&
-            addNode(targetNode as any as FlowDetail, parent, nodes, index, level, expandNodes, todoNodeIdList);
+          if (isGetewaysType) {
+            // console.log('geteway targetNode = ', targetNode);
+            targetNode.name = '网关节点';
+          }
+          addNode(targetNode as any as FlowDetail, parent, nodes, index, level, expandNodes, todoNodeIdList);
+          //   break;
+          // }
+          // !isGetewaysType &&
+          //   addNode(targetNode as any as FlowDetail, parent, nodes, index, level, expandNodes, todoNodeIdList);
           nextColumnNodes.push(targetNode);
         }
       }

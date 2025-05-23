@@ -989,7 +989,7 @@
       });
   };
 
-  const { isActive, pause, resume } = useTimeoutPoll(fetchTaskflowDetails, 10000);
+  // const { isActive, pause, resume } = useTimeoutPoll(fetchTaskflowDetails, 10000);
 
   /**
    * 重试节点

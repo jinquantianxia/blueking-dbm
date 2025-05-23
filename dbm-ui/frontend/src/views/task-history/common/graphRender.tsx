@@ -19,7 +19,7 @@ import { getCostTimeDisplay } from '@utils';
 
 import { t } from '@locales/index';
 
-import type { GraphNode } from './utils';
+import { getewayTypes, type GraphNode } from './utils';
 
 enum NODE_ICON {
   actuator_script = 'db-icon-deploy',
@@ -71,7 +71,9 @@ export default class GraphRender {
 
   render(type: RenderCollectionKey, args: any[] = []) {
     if (Object.prototype.hasOwnProperty.call(this.renderCollection, type)) {
+      // console.log('type = ', type);
       const vNode = this.renderCollection[type].render.call(this, args);
+      // console.log('vNode = ', vNode);
       const htmlNode = this.vNodeToHtml(vNode);
       return typeof htmlNode === 'string' ? htmlNode : htmlNode.outerHTML;
     }
@@ -98,6 +100,8 @@ export default class GraphRender {
       type,
       updated_at: updatedAt,
     } = node.data;
+
+    const isGatewayNode = getewayTypes.includes(type);
 
     const activities = pipeline?.activities;
     let isParentFlow = false;
@@ -151,7 +155,9 @@ export default class GraphRender {
     const nodeClickType = type === 'ServiceActivity' && !createdStatus ? 'log' : '';
     const isShowTime = status !== 'CREATED' && updatedAt && startedAt && updatedAt - startedAt >= 0;
     const diffSeconds = status === 'RUNNING' ? Math.floor(Date.now() / 1000) - startedAt : updatedAt - startedAt;
-    return (
+    return isGatewayNode ? (
+      <div class='node-gateway-layout'>{node.data.name}</div>
+    ) : (
       <div class={['node-ractangle-layout', { 'node-hover': node.children || nodeClickType }]}>
         {node.children ? (
           <div class='node-ractangle-collapse'>
@@ -296,7 +302,8 @@ export default class GraphRender {
 
     if (Array.isArray(children)) {
       for (const childVNode of children) {
-        el.append(this.vNodeToHtml(childVNode as VNode));
+        // console.log('childVNode = ', childVNode);
+        if (childVNode) el.append(this.vNodeToHtml(childVNode as VNode));
       }
     }
 
