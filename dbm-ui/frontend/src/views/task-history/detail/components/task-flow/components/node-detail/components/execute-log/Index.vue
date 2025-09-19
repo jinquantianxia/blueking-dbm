@@ -46,7 +46,7 @@
     <DbLog
       ref="dbLogRef"
       :loading="logState.loading"
-      :style="{ height: isFullscreen ? 'calc(100% - 42px)' : '100%' }" />
+      style="height: calc(100% - 42px)" />
   </div>
 </template>
 
@@ -96,7 +96,9 @@
       .then((data) => {
         logState.data = data;
         handleClearLog();
-        dbLogRef.value!.setLog(data);
+        setTimeout(() => {
+          dbLogRef.value!.setLog(data);
+        });
       })
       .finally(() => {
         logState.loading = false;
@@ -176,6 +178,11 @@
       }
       if (!isRunning && isActive.value) {
         pause();
+
+        // 处理节点状态已完成，但剩余日志还没来的及刷新到日志接口的情况，请求多一次，确保拿到完整日志
+        setTimeout(() => {
+          getNodeLogRequest();
+        }, 5000);
       }
     },
   );
@@ -195,12 +202,11 @@
   );
 
   watch(isFullscreen, () => {
-    if (!isFullscreen.value) {
-      isShow.value = false;
-      setTimeout(() => {
-        isShow.value = true;
-      });
-    }
+    dbLogRef.value?.destroy();
+    setTimeout(() => {
+      dbLogRef.value?.init();
+      dbLogRef.value!.setLog(logState.data);
+    });
   });
 
   const handleClearLog = () => {
