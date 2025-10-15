@@ -74,7 +74,7 @@
                 <BkTag
                   class="side-item-tag"
                   :theme="item.tagTheme">
-                  {{ t(item.statusText) }}
+                  {{ item.statusText }}
                 </BkTag>
                 <span
                   v-if="item.is_reviewed === false"

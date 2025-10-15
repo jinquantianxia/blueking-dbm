@@ -119,7 +119,7 @@ export default defineConfig(({ mode }) => {
         '/bkrepo_upload': {
           target: '', // 见获取bkrepo上传凭证接口
           changeOrigin: true,
-          rewrite: path => path.replace(/^\/bkrepo_upload/, ''),
+          rewrite: (path) => path.replace(/^\/bkrepo_upload/, ''),
         },
       },
     },

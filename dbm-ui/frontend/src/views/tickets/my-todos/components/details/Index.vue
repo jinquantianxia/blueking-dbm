@@ -144,7 +144,7 @@
       key: 'status',
       render: () => {
         if (state.ticketData) {
-          return <bk-tag theme={state.ticketData.tagTheme}>{t(state.ticketData.statusText)}</bk-tag>;
+          return <bk-tag theme={state.ticketData.tagTheme}>{state.ticketData.statusText}</bk-tag>;
         }
         return <bk-tag theme={undefined} />;
       },
