@@ -57,7 +57,9 @@
         @selection="handleSelection"
         @setting-change="updateTableSettings">
         <template #operation>
-          <OperationColumn :cluster-type="ClusterTypes.REDIS">
+          <OperationColumn
+            ref="operationColumnRef"
+            :cluster-type="ClusterTypes.REDIS">
             <template #default="{ data }: { data: RedisModel }">
               <div v-db-console="'redis.clusterManage.extractKey'">
                 <OperationBtnStatusTips
@@ -179,6 +181,10 @@
                   </AuthButton>
                 </OperationBtnStatusTips>
               </div>
+              <ClusterAlarmSubscribe
+                :data="data"
+                @click="hideOperationColumn"
+                @edit="(e) => handleToDetails(data.id, e, 'alarmSubscription')" />
               <!-- <FunController
                 controller-id="redis_nameservice"
                 module-id="addons"> -->
@@ -405,6 +411,7 @@
 </template>
 <script setup lang="tsx">
   import type { ISearchItem } from 'bkui-vue/lib/search-select/utils';
+  import type { ComponentExposed } from 'vue-component-type-helpers';
   import { useI18n } from 'vue-i18n';
   import { useRoute, useRouter } from 'vue-router';
 
@@ -416,10 +423,10 @@
 
   import { ClusterTypes, DBTypes, TicketTypes, UserPersonalSettings } from '@common/const';
 
-  import DbTable from '@components/db-table/index.vue';
   import TagBlock from '@components/tag-block/Index.vue';
   import TagSearch from '@components/tag-search/index.vue';
 
+  import ClusterAlarmSubscribe from '@views/db-manage/common/cluster-alarm-subscribe/Index.vue';
   import ClusterBatchOperation from '@views/db-manage/common/cluster-batch-opration/Index.vue';
   import ClusterEntryPanel from '@views/db-manage/common/cluster-entry-panel/Index.vue';
   import ClusterIpCopy from '@views/db-manage/common/cluster-ip-copy/Index.vue';
@@ -493,7 +500,8 @@
     showDetail: isShowDetail,
   } = useGoClusterDetail('redisClusterDetail');
 
-  const tableRef = ref<InstanceType<typeof DbTable>>();
+  const operationColumnRef = ref<ComponentExposed<typeof OperationColumn>>();
+  const tableRef = ref();
   const selected = ref<RedisModel[]>([]);
   const tagSearchValue = ref<Record<string, any>>({});
 
@@ -679,7 +687,12 @@
     selected.value = list;
   };
 
+  const hideOperationColumn = () => {
+    operationColumnRef.value?.hide();
+  };
+
   const handleShowPassword = (id: number) => {
+    hideOperationColumn();
     passwordState.isShow = true;
     passwordState.fetchParams.cluster_id = id;
   };

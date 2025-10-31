@@ -54,7 +54,9 @@
       @selection="handleSelection"
       @setting-change="updateTableSettings">
       <template #operation>
-        <OperationColumn :cluster-type="ClusterTypes.REDIS_INSTANCE">
+        <OperationColumn
+          ref="operationColumnRef"
+          :cluster-type="ClusterTypes.REDIS_INSTANCE">
           <template #default="{ data }: { data: RedisModel }">
             <div v-db-console="'redis.haClusterManage.extractKey'">
               <OperationBtnStatusTips
@@ -163,6 +165,10 @@
                 </AuthButton>
               </OperationBtnStatusTips>
             </div>
+            <ClusterAlarmSubscribe
+              :data="data"
+              @click="hideOperationColumn"
+              @edit="(e) => handleToDetails(data.id, e, 'alarmSubscription')" />
             <div v-db-console="'redis.haClusterManage.queryAccessSource'">
               <OperationBtnStatusTips
                 :data="data"
@@ -306,6 +312,7 @@
 </template>
 <script setup lang="tsx">
   import type { ISearchItem } from 'bkui-vue/lib/search-select/utils';
+  import type { ComponentExposed } from 'vue-component-type-helpers';
   import { useI18n } from 'vue-i18n';
 
   import RedisModel from '@services/model/redis/redis';
@@ -322,6 +329,7 @@
   import TagBlock from '@components/tag-block/Index.vue';
   import TagSearch from '@components/tag-search/index.vue';
 
+  import ClusterAlarmSubscribe from '@views/db-manage/common/cluster-alarm-subscribe/Index.vue';
   import ClusterBatchOperation from '@views/db-manage/common/cluster-batch-opration/Index.vue';
   import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterIpCopy from '@views/db-manage/common/cluster-ip-copy/Index.vue';
@@ -382,6 +390,7 @@
     showDetail: isShowDetail,
   } = useGoClusterDetail('redisClusterHaDetail');
 
+  const operationColumnRef = ref<ComponentExposed<typeof OperationColumn>>();
   const tableRef = ref<InstanceType<typeof DbTable>>();
   const tagSearchValue = ref<Record<string, any>>({});
 
@@ -565,7 +574,12 @@
     selected.value = list;
   };
 
+  const hideOperationColumn = () => {
+    operationColumnRef.value?.hide();
+  };
+
   const handleShowPassword = (id: number) => {
+    hideOperationColumn();
     passwordState.isShow = true;
     passwordState.fetchParams.cluster_id = id;
   };

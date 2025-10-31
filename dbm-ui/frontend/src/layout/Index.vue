@@ -186,6 +186,7 @@
       'ticketSelfManage',
       'InspectionTodos',
       'platformAlarmEventsTodo',
+      'myAlarmSubscription',
     ],
     [menuEnum.platformManage]: [
       'platformTaskManage',
