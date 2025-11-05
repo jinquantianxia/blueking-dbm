@@ -137,6 +137,8 @@
     });
   };
 
+  console.log(userProfileStore.profile);
+
   onMounted(() => {
     if (checkDbConsole('mysql.toolbox.sqlExecute') || checkDbConsole('tendbCluster.toolbox.sqlExecute')) {
       useSQLTaskNotify();
