@@ -86,9 +86,14 @@ export const useTableData = (props: Props) => {
       tableName.value = result.name;
       const rawTitleList: typeof titleList.value = result.title;
       if (result.count > 0 && !Object.keys(columnWidthMap.value).length) {
+        const titleMap = result.title.reduce<Record<string, ReportInfo['title'][number]>>(
+          (results, item) => Object.assign(results, { [item.name]: item }),
+          {},
+        );
         Object.entries(result.results[0]).forEach(([key, value]) => {
           const width = calcTextWidth(value);
-          columnWidthMap.value[key] = width > 120 ? width : 120;
+          const isLink = titleMap[key]?.format === 'link';
+          columnWidthMap.value[key] = isLink ? 120 : width > 120 ? width : 120;
         });
       }
       rawTitleList.forEach((item) => {

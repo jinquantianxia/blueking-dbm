@@ -66,7 +66,7 @@
               v-else-if="item.format === 'link'"
               :href="row[item.name]"
               target="_blank">
-              {{ row[item.name] }}
+              {{ t('查看详情') }}
             </a>
             <span v-else-if="item.format === 'time'">{{ utcDisplayTime(row[item.name]) }}</span>
             <span v-else-if="item.filter?.type === 'biz'">
