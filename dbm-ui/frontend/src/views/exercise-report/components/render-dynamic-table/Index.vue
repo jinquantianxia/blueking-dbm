@@ -34,6 +34,7 @@
         :max-height="485"
         :pagination="pagination"
         resizable
+        row-key="__uuid"
         @filter-change="handleFilterChange"
         @page-change="handlePageChange"
         @sort-change="handleSortChange">
@@ -72,12 +73,23 @@
             <span v-else-if="item.filter?.type === 'biz'">
               {{ bizIdMap.get(row[item.name])?.name || row[item.name] }}
             </span>
+            <BkButton
+              v-else-if="item.format === 'log'"
+              text
+              theme="primary"
+              @click="() => handleShowLogDetail(item.display_name, row[item.name])">
+              {{ t('详情') }}
+            </BkButton>
             <span v-else>{{ row[item.name] || '--' }}</span>
           </template>
         </TableColumn>
       </PrimaryTable>
     </CollapseCard>
   </BkLoading>
+  <Log
+    v-model:is-show="isShowLog"
+    :log="logDetail"
+    :title="logTitle" />
 </template>
 <script setup lang="tsx">
   import { useI18n } from 'vue-i18n';
@@ -91,6 +103,7 @@
 
   import { utcDisplayTime } from '@utils';
 
+  import Log from './components/Log.vue';
   import { useTableData } from './hooks/useTableData';
 
   export interface Props {
@@ -113,6 +126,10 @@
 
   const { locale, t } = useI18n();
   const { bizIdMap } = useGlobalBizs();
+
+  const isShowLog = ref(false);
+  const logDetail = ref('');
+  const logTitle = ref('');
 
   const placeholder = computed(() => {
     const split = locale.value === 'en' ? ',' : '、';
@@ -170,6 +187,12 @@
         break;
     }
     return text;
+  };
+
+  const handleShowLogDetail = (title: string, log: string) => {
+    logTitle.value = title;
+    logDetail.value = log;
+    isShowLog.value = true;
   };
 
   defineExpose<Exposes>({

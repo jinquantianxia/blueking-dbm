@@ -5,10 +5,10 @@ import { useRequest } from 'vue-request';
 import { getReport } from '@services/source/report';
 
 import { useGlobalBizs } from '@stores';
-
+import { getUserList } from '@services/source/user';
 import DbQuickSearch from '@components/db-quick-search/Index.vue';
 
-import { calcTextWidth } from '@utils';
+import { calcTextWidth, random } from '@utils';
 
 import type { Props, ReportInfo } from '../Index.vue';
 
@@ -45,7 +45,7 @@ export const useTableData = (props: Props) => {
       return [];
     }
 
-    return reportData.value.title.reduce<ComponentProps<typeof DbQuickSearch>['data']>((results, item) => {
+    const searchList = reportData.value.title.reduce<ComponentProps<typeof DbQuickSearch>['data']>((results, item) => {
       if (item.filter) {
         const searchItem = {
           id: item.name,
@@ -70,6 +70,33 @@ export const useTableData = (props: Props) => {
       }
       return results;
     }, []);
+    if (props.serviceUrl.includes('backup_recover_drill')) {
+      // 只有回档演练需要DBA过滤
+      searchList.unshift({
+        id: 'dba',
+        name: 'DBA',
+        remoteMethod: (params: { defaultValue?: string; keyword?: string }) => {
+          const requestParams = {};
+          if (params.defaultValue) {
+            Object.assign(requestParams, { exact_lookups: params.defaultValue });
+          }
+          if (params.keyword) {
+            Object.assign(requestParams, { fuzzy_lookups: params.keyword });
+          }
+
+          return getUserList(requestParams).then((data) =>
+            data.results.map((item) => ({
+              label: `${item.username} (${item.display_name})`,
+              value: item.username,
+            })),
+          );
+        },
+        remoteSearch: true,
+        type: 'single',
+      });
+    }
+
+    return searchList;
   });
 
   let sortParams: Record<string, string> = {};
@@ -92,8 +119,8 @@ export const useTableData = (props: Props) => {
         );
         Object.entries(result.results[0]).forEach(([key, value]) => {
           const width = calcTextWidth(value);
-          const isLink = titleMap[key]?.format === 'link';
-          columnWidthMap.value[key] = isLink ? 120 : width > 120 ? width : 120;
+          const isFixedWidth = ['link', 'log'].includes(titleMap[key]?.format);
+          columnWidthMap.value[key] = isFixedWidth ? 120 : width > 120 ? width : 120;
         });
       }
       rawTitleList.forEach((item) => {
@@ -125,7 +152,10 @@ export const useTableData = (props: Props) => {
         });
       });
       titleList.value = rawTitleList;
-      tableData.value = result.results;
+      tableData.value = result.results.map((item) => ({
+        ...item,
+        __uuid: random(),
+      }));
     },
   });
 
