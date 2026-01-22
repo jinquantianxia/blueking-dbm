@@ -11,7 +11,8 @@
     <BkForm
       ref="formRef"
       form-type="vertical"
-      :model="formData">
+      :model="formData"
+      :rules="rules">
       <BkFormItem
         :label="isSpecial ? t('标题') : t('风险名称')"
         property="name"
@@ -38,13 +39,10 @@
         :label="isSpecial ? t('具体要求') : t('风险描述')"
         property="describe"
         required>
-        <BkInput
+        <RiskMemoEditor
           v-model="formData.describe"
-          clearable
-          :placeholder="isSpecial ? t('请输入具体的要求') : t('请输入风险描述')"
-          :resize="false"
-          :rows="8"
-          type="textarea" />
+          class="rich-text-editor-main"
+          :placeholder="isSpecial ? t('请输入具体的要求') : t('请输入风险描述')" />
       </BkFormItem>
       <BkFormItem
         :label="isSpecial ? t('涉及 DB') : t('影响 DB')"
@@ -58,8 +56,7 @@
       </BkFormItem>
       <BkFormItem
         :label="isSpecial ? t('涉及集群') : t('影响集群')"
-        property="effectClusters"
-        :rules="rules.effectClusters">
+        property="effectClusters">
         <div style="display: flex">
           <BkSelect
             v-model="formData.effectClusters"
@@ -105,6 +102,8 @@
 
   import { DBTypeInfos, DBTypes } from '@common/const';
 
+  import RiskMemoEditor from '../../RickMemoEditor.vue';
+
   interface Props {
     effectBizLabels?: {
       label: string;
@@ -147,7 +146,16 @@
     value: item.id,
   }));
 
+  const EMPTY_TEXT = '<p><br></p>';
+
   const rules = {
+    describe: [
+      {
+        message: () => (props.isSpecial ? t('具体要求不能为空') : t('风险描述不能为空')),
+        trigger: 'blur',
+        validator: (value: string) => value !== EMPTY_TEXT,
+      },
+    ],
     effectClusters: [
       {
         message: () => (props.isSpecial ? t('涉及集群不能为空') : t('影响集群不能为空')),
@@ -194,7 +202,7 @@
     formData,
     () => {
       Object.values(formData.value).forEach((item) => {
-        if (item.length) {
+        if (item.length && item !== EMPTY_TEXT) {
           window.changeConfirm = true;
         }
       });
@@ -232,6 +240,7 @@
 
   const handleClickCancel = () => {
     isShow.value = false;
+    handleClosed();
   };
 
   const handleClosed = () => {
@@ -250,6 +259,10 @@
         gap: 8px;
         margin-top: 32px;
       }
+    }
+
+    .w-e-text-placeholder {
+      top: 8px;
     }
   }
 </style>

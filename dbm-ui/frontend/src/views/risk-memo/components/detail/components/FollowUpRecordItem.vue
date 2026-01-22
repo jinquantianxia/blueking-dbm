@@ -118,9 +118,8 @@
 
   import { utcDisplayTime } from '@utils';
 
+  import RiskMemoEditor from '../../RickMemoEditor.vue';
   import { type FollowUpList } from '../Index.vue';
-
-  import RiskMemoEditor from './Editor.vue';
 
   interface Props {
     bizId?: number;
@@ -261,7 +260,7 @@
           }
 
           .title-display {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: #313238;
           }

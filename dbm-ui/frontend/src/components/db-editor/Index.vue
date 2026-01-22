@@ -88,8 +88,9 @@
   watch(
     isEditorMode,
     () => {
-      setTimeout(() => {
+      nextTick(() => {
         if (isEditorMode.value) {
+          editorRef.value?.enable();
           editorRef.value?.focus(true);
         } else {
           editorRef.value?.disable();
@@ -129,7 +130,7 @@
     }
 
     .w-e-text-container {
-      font-size: 14px; /* 设置编辑器基础字体大小 */
+      font-size: 12px; /* 设置编辑器基础字体大小 */
     }
 
     .w-e-toolbar {

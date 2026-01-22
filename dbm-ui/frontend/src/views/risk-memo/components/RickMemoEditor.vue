@@ -2,6 +2,7 @@
   <DbEditor
     v-model="editorHtml"
     :edit-mode="mode"
+    :placeholder="placeholder"
     :upload-image-config="uploadImageConfig" />
 </template>
 <script setup lang="ts">
@@ -9,13 +10,15 @@
 
   interface Props {
     mode?: 'default' | 'viewer';
+    placeholder?: string;
   }
 
   withDefaults(defineProps<Props>(), {
     mode: 'default',
+    placeholder: undefined,
   });
 
-  const editorHtml = defineModel({
+  const editorHtml = defineModel<string>({
     default: '',
   });
 
