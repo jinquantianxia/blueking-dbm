@@ -55,6 +55,7 @@
           :placeholder="isSpecial ? t('请选择 DB  类型') : t('请选择 DB')" />
       </BkFormItem>
       <BkFormItem
+        class="effect-clusters-main"
         :label="isSpecial ? t('涉及集群') : t('影响集群')"
         property="effectClusters">
         <div style="display: flex">
@@ -258,6 +259,19 @@
         display: flex;
         gap: 8px;
         margin-top: 32px;
+      }
+    }
+
+    .effect-clusters-main {
+      .bk-form-label {
+        &::after {
+          position: absolute;
+          top: 0;
+          width: 14px;
+          color: #ea3636;
+          text-align: center;
+          content: "*";
+        }
       }
     }
 

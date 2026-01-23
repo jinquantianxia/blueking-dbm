@@ -1,5 +1,5 @@
 <template>
-  <div class="rich-text-edit-value-main">
+  <div class="rich-text-edit-value-main" :class="{ 'is-only-view': !isEditorMode }">
     <div class="display-mian">
       <RiskMemoEditor
         :key="riskId"
@@ -130,6 +130,15 @@
     flex-direction: column;
     width: 100%;
     font-size: 12px;
+
+    &.is-only-view {
+
+      .db-editor-main {
+        background: #f5f7fa;
+        padding: 16px;
+        border-radius: 8px;
+      }
+    }
 
     .display-mian {
       display: flex;
