@@ -5184,7 +5184,7 @@
   "操作系统限制": "Operating system limit",
   "版本名": "Version name",
   "请补全版本文件信息": "Please complete the version file information",
-  "搜索版本号，版本名，操作系统限制，版本文件，是否启用，描述，更新人": "Search version number, version name, operating system limit, version file, enable, description, updater",
+  "搜索版本名，版本阶段，版本号，是否启用，描述，更新人": "Search version number, version stag, version name, enable, description, updater",
   "版本文件（适配系统）": "Version file (compatible system)",
   "适用的操作系统": "Applicable operating systems",
   "至少保留1个版本文件": "At least keep 1 version file",

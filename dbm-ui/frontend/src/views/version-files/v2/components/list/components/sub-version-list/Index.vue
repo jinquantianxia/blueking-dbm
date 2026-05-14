@@ -36,7 +36,7 @@
           :key="renderSearchKey"
           v-model="searchValue"
           :data="searchSelectData"
-          :placeholder="t('搜索版本号，版本名，操作系统限制，版本文件，是否启用，描述，更新人')"
+          :placeholder="t('搜索版本名，版本阶段，版本号，是否启用，描述，更新人')"
           style="width: 670px"
           unique-select
           value-split-code=","

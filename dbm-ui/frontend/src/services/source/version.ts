@@ -171,6 +171,25 @@ export function deleteDbVersion(params: { id: number }) {
 }
 
 /**
+ * 校验介质版本名称/版本号在所属发行版下是否冲突
+ */
+export function checkDbversionNameConflict(params: {
+  // 排除的介质版本ID, 编辑场景使用
+  exclude_id?: number;
+  // 完整版本号(对外段数)
+  full_version?: string;
+  // 版本名称
+  name?: string;
+  // 版本系列ID
+  version_series: number;
+}) {
+  return http.get<{
+    name_conflict: boolean;
+    version_conflict: boolean;
+  }>(`${path}/dbversion/check_name_conflict/`, params);
+}
+
+/**
  * 版本系列列表
  */
 export function getVersionSeriesList(params: { distribution: number }) {

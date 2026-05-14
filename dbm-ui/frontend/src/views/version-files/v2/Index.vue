@@ -39,6 +39,7 @@
 </template>
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
+  import { useRoute, useRouter } from 'vue-router';
 
   import type {
     ControllerBaseInfo,
@@ -70,8 +71,11 @@
 
   const { t } = useI18n();
   const funControllerStore = useFunController();
+  const route = useRoute();
+  const router = useRouter();
 
   const pkgActive = ref('');
+  const dbTypeActive = ref<DBTypes>(DBTypes.MYSQL);
 
   const tabs: TabItem[] = [
     {
@@ -209,6 +213,10 @@
         {
           label: t('任务执行器'),
           name: 'actuator',
+        },
+        {
+          label: t('ES 插件'),
+          name: 'es-plugin',
         },
       ],
       controller: {
@@ -433,7 +441,6 @@
     return true;
   });
 
-  const dbTypeActive = ref<DBTypes>(DBTypes.MYSQL);
   const activeTabInfo = computed(() => {
     const tabList = renderTabs.find((item) => item.name === dbTypeActive.value);
     return tabList
@@ -454,6 +461,32 @@
       immediate: true,
     },
   );
+
+  watch(
+    [dbTypeActive, pkgActive],
+    () => {
+      router.replace({
+        query: {
+          ...route.query,
+          dbType: dbTypeActive.value,
+          pkgType: pkgActive.value,
+        },
+      });
+    },
+    {
+      immediate: true,
+    },
+  );
+
+  onMounted(() => {
+    const { dbType, pkgType } = route.query;
+    if (dbType && pkgType) {
+      dbTypeActive.value = dbType as DBTypes;
+      nextTick(() => {
+        pkgActive.value = pkgType as string;
+      });
+    }
+  });
 </script>
 <style lang="less">
   .version-files-page {

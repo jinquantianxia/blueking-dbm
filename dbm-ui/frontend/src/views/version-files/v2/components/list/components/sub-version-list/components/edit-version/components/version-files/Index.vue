@@ -2,9 +2,9 @@
   <table class="version-files-table">
     <thead>
       <tr>
-        <th style="width: 340px">{{ t('文件名') }}</th>
-        <th style="width: 152px">{{ t('适用的操作系统') }}</th>
-        <th style="width: 356px">{{ t('操作系统版本') }}</th>
+        <th style="width: 340px">{{ t('文件') }}</th>
+        <th style="width: 152px">OS</th>
+        <th style="width: 356px">{{ t('OS版本') }}</th>
         <th style="width: 64px"></th>
       </tr>
     </thead>
@@ -16,6 +16,7 @@
         :able-to-delete="tableData.length > 1"
         :data="item"
         :is-applied="isApplied"
+        :is-only-one-file="isOnlyOneFile"
         :selected-systems="selectedSystems"
         :selected-versions="selectedVersions"
         @delete="() => handleDeleteRow(index)"
@@ -73,6 +74,7 @@
   >([]);
 
   const uploadedFileNames = computed(() => tableData.value.map((item) => item.name));
+  const isOnlyOneFile = computed(() => tableData.value.length === 1);
 
   watch(
     () => props.data,

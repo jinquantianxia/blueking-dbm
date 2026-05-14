@@ -145,7 +145,7 @@
   import DbVersionModel from '@services/model/version-file/db-version';
   import ReleaseVersionModel from '@services/model/version-file/release-version';
   import { batchCreatePackages, batchDeletePackages } from '@services/source/package';
-  import { createDbVersion, updateDbVersion } from '@services/source/version';
+  import { checkDbversionNameConflict, createDbVersion, updateDbVersion } from '@services/source/version';
 
   import { useBeforeClose } from '@hooks';
 
@@ -229,7 +229,7 @@
 
   const defaultAutoVersionName = computed(() =>
     isPureMysql.value
-      ? `${props.pkgType}_${props.releaseVersion?.name}_${formModel.value.full_version}`
+      ? `${props.pkgType.toLocaleLowerCase()}_${props.releaseVersion?.name.toLocaleLowerCase()}_${formModel.value.full_version}`
       : `${props.pkgType}_${formModel.value.full_version}`,
   );
 
@@ -250,6 +250,36 @@
         trigger: 'blur',
         validator: (value: string) =>
           isFullVersionSixMax.value ? /^(\d+\.){5}\d+$/.test(value) : /^(\d+\.){2}\d+$/.test(value),
+      },
+      {
+        message: t('该版本号已存在'),
+        validator: async (value: string) => {
+          if (props.isEdit || !formModel.value.version_series) {
+            return true;
+          }
+
+          const result = await checkDbversionNameConflict({
+            full_version: value,
+            version_series: formModel.value.version_series,
+          });
+          return !result.version_conflict;
+        },
+      },
+    ],
+    name: [
+      {
+        message: t('该版本名已存在'),
+        validator: async (value: string) => {
+          if (props.dbVersion?.name === value || !formModel.value.version_series) {
+            return true;
+          }
+
+          const result = await checkDbversionNameConflict({
+            name: value,
+            version_series: formModel.value.version_series,
+          });
+          return !result.name_conflict;
+        },
       },
     ],
     version_series: [
@@ -290,7 +320,7 @@
     manual: true,
     onSuccess: () => {
       emits('success', formModel.value.version_series);
-      messageSuccess(props.isEdit ? t('更新成功') : t('新增成功'));
+      messageSuccess(t('操作成功'));
       formModel.value = initFormModel();
       isShow.value = false;
     },

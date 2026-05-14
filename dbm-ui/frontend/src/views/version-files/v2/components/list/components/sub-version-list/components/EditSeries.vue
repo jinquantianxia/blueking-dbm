@@ -89,7 +89,7 @@
   );
   const handleSuccess = (data: { id: number; name: string }) => {
     emits('confirm', data.id, data.name);
-    messageSuccess(props.mode === 'create' ? t('新增成功') : t('更新成功'));
+    messageSuccess(t('操作成功'));
     isEdit.value = false;
     newVersionName.value = '';
   };

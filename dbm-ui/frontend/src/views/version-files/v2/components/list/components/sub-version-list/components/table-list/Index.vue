@@ -616,6 +616,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         flex: 1;
+        cursor: pointer;
       }
 
       .tags-main {

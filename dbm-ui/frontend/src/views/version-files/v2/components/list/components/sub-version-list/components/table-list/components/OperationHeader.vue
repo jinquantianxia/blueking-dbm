@@ -116,7 +116,7 @@
   const { loading: deleteVersionSeriesLoading, run: runDeleteVersionSeries } = useRequest(deleteVersionSeries, {
     manual: true,
     onSuccess: () => {
-      messageSuccess(t('删除成功'));
+      messageSuccess(t('操作成功'));
       emits('deleteVersionSeries');
     },
   });

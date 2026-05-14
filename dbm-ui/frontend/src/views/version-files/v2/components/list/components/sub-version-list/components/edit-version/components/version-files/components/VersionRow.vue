@@ -11,11 +11,11 @@
       <BkSelect
         v-model="localData.permit_os_type"
         :clearable="false"
-        @change="(value)=> handleSystemChange(value)">
+        @change="(value) => handleSystemChange(value)">
         <BkOption
           v-for="system in systemList"
-          :disabled="selectedAllSystems.has(system.value) && selectedAllVersions[system.value]?.has('all')"
           :key="system.value"
+          :disabled="selectedAllSystems.has(system.value) && selectedAllVersions[system.value]?.has('all')"
           :label="system.label"
           :value="system.value" />
       </BkSelect>
@@ -79,8 +79,8 @@
         </template>
         <BkOption
           v-for="version in versionList"
-          :disabled="selectedAllVersions[localData.permit_os_type]?.has(version.value)"
           :key="version.value"
+          :disabled="selectedAllVersions[localData.permit_os_type]?.has(version.value)"
           :label="version.label"
           :value="version.value" />
       </BkSelect>
@@ -117,6 +117,7 @@
       size: number;
     };
     isApplied?: boolean;
+    isOnlyOneFile: boolean;
     selectedSystems: Set<string>;
     selectedVersions: Record<string, Set<string>>;
   }
@@ -199,7 +200,10 @@
         selectedAllSystems.value = props.selectedSystems;
         selectedAllVersions.value = props.selectedVersions;
         if (localData.value.permit_os.length > 0) {
-          if (props.selectedVersions[localData.value.permit_os_type]?.has('all') && !localData.value.permit_os.includes('all')) {
+          if (
+            props.selectedVersions[localData.value.permit_os_type]?.has('all') &&
+            !localData.value.permit_os.includes('all')
+          ) {
             localData.value.permit_os_type = '';
             localData.value.permit_os = [];
             versionList.value = [];
@@ -209,9 +213,9 @@
 
           const localSelectedVersions = _.cloneDeep(props.selectedVersions);
           if (localSelectedVersions[localData.value.permit_os_type]?.size > 0) {
-            localData.value.permit_os.forEach(item => {
+            localData.value.permit_os.forEach((item) => {
               localSelectedVersions[localData.value.permit_os_type].delete(item);
-            })
+            });
           }
           selectedAllVersions.value = localSelectedVersions;
         }
@@ -244,6 +248,10 @@
       value: item,
     }));
     if (!isInit) {
+      if (props.isOnlyOneFile) {
+        localData.value.permit_os = ['all'];
+        return;
+      }
       localData.value.permit_os = [];
     }
   };

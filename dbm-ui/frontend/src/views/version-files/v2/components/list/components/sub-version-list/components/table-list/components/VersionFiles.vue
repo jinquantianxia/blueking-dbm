@@ -11,22 +11,22 @@
       </div>
       <div class="version-tags">
         <BkTag
-          v-if="item.permit_os.length === 1"
+          v-if="item.permit_os?.length === 1"
           theme="info">
           {{ item.permit_os[0] }}
         </BkTag>
         <BkTag
-          v-else-if="!item.permit_os.length && item.permit_os_type === 'windows'"
+          v-else-if="!item.permit_os?.length && item.permit_os_type === 'Windows'"
           theme="info">
           {{ `Windows ${t('全部')}` }}
         </BkTag>
         <BkTag
-          v-else-if="item.permit_os.length >= 2"
+          v-else-if="item.permit_os?.length >= 2"
           v-bk-tooltips="{
-            content: item.permit_os.join('\n'),
+            content: item.permit_os?.join('\n'),
           }"
           theme="info">
-          {{ `${item.permit_os_type} x ${item.permit_os.length}` }}
+          {{ `${item.permit_os_type} x ${item.permit_os?.length}` }}
         </BkTag>
         <span v-else></span>
         <BkButton

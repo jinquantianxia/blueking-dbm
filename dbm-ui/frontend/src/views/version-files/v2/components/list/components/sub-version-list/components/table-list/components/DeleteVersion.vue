@@ -60,7 +60,7 @@
   const { loading: deleteDbVersionLoading, run: runDeleteDbVersion } = useRequest(deleteDbVersion, {
     manual: true,
     onSuccess: () => {
-      messageSuccess(t('删除成功'));
+      messageSuccess(t('操作成功'));
       emits('success');
     },
   });

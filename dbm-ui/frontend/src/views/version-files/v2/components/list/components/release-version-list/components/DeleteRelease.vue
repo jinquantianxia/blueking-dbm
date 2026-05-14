@@ -52,7 +52,7 @@
   const { loading: deleteReleaseVersionLoading, run: runDeleteReleaseVersion } = useRequest(deleteReleaseVersion, {
     manual: true,
     onSuccess() {
-      messageSuccess(t('删除成功'));
+      messageSuccess(t('操作成功'));
       emits('success');
     },
   });
