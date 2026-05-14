@@ -191,6 +191,15 @@
     version_series: 0,
   });
 
+  const initFormModelFromProps = () => {
+    formModel.value.version_series = props.dbVersion!.version_series;
+    formModel.value.full_version = props.dbVersion!.full_version;
+    formModel.value.name = props.dbVersion!.name;
+    formModel.value.phase = props.dbVersion!.phase;
+    formModel.value.description = props.dbVersion!.description;
+    formModel.value.enable = props.dbVersion!.enable;
+  };
+
   const dbPkgSixMaxMap: Record<string, Record<string, boolean>> = {
     mysql: {
       mysql: true,
@@ -295,12 +304,7 @@
     () => props.dbVersion,
     () => {
       if (props.dbVersion) {
-        formModel.value.version_series = props.dbVersion.version_series;
-        formModel.value.full_version = props.dbVersion.full_version;
-        formModel.value.name = props.dbVersion.name;
-        formModel.value.phase = props.dbVersion.phase;
-        formModel.value.description = props.dbVersion.description;
-        formModel.value.enable = props.dbVersion.enable;
+        initFormModelFromProps();
       } else {
         formModel.value = initFormModel();
       }
@@ -374,6 +378,10 @@
 
   const handleCancel = () => {
     isShow.value = false;
+    if (props.isEdit) {
+      initFormModelFromProps();
+      return;
+    }
     formModel.value = initFormModel();
   };
 </script>
