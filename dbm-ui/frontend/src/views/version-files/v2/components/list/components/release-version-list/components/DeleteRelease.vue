@@ -14,7 +14,9 @@
     @confirm="handleDeleteRelease">
     <DbIcon
       v-bk-tooltips="{
-        content: data?.isDeleteDisabled ? t('存在版本内容，无法删除') : t('删除'),
+        content: data?.isDeleteDisabled
+          ? t('该发行版下存在 n 个版本，请删除后再操作', { n: data.dbversion_count })
+          : t('删除'),
         disabled: !data?.isDeleteDisabled,
       }"
       class="edit-icon"

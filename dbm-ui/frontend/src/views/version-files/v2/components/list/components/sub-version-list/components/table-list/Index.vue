@@ -6,23 +6,35 @@
     :loading="tableLoading"
     :max-height="tableMaxHeight"
     resizable
-    row-class-name="sub-version-table-row"
+    :row-class-name="rowClassNameFn"
     row-key="uuid"
     :rowspan-and-colspan="rowspanAndColspan"
+    table-layout="auto"
     @change="handleFilterChange"
     @sort-change="handleSortChange">
     <TableColumn
-      col-key="full_version"
-      :filter="tableFilter?.full_version"
+      class-name="version-name-table-cell"
+      col-key="name"
+      ellipsis
+      :min-width="180"
       resizable
-      :title="t('版本号')"
-      :width="180">
+      :resize="{ minWidth: 180, maxWidth: 500 }"
+      :title="t('版本名')">
       <template #default="{ row, rowIndex }">
         <TextOverflowLayout
           v-if="!row.versionSeriesInfo"
           class="version-display-column"
           :class="{ 'is-recommend': row.recommend }">
-          <span class="display-text">{{ row.full_version }}</span>
+          <template #prepend>
+            <RecommendConfig
+              :data="row"
+              @success="fetchTableData" />
+          </template>
+          <div
+            class="version-display-name"
+            @click="() => handleEditDbVersion(row)">
+            {{ row.name }}
+          </div>
           <template #append>
             <span class="tags-main">
               <BkTag
@@ -30,17 +42,16 @@
                 :theme="stagTagMap[row.phase]?.theme">
                 {{ stagTagMap[row.phase]?.label }}
               </BkTag>
-              <BkTag
-                v-if="row.recommend"
-                size="small"
-                theme="success">
-                {{ t('推荐') }}
-              </BkTag>
+              <DbIcon
+                v-if="row.description"
+                v-bk-tooltips="{
+                  content: row.description,
+                  placement: 'right',
+                  theme: 'light',
+                }"
+                class="column-describe-tip"
+                type="attention" />
             </span>
-            <RecommendConfig
-              v-if="!row.recommend"
-              :data="row"
-              @success="fetchTableData" />
           </template>
         </TextOverflowLayout>
         <CollapseCard
@@ -53,65 +64,54 @@
               :data="row.versionSeriesInfo.info"
               :db-version-list-count="row.versionSeriesInfo.children.length"
               @add-new-version="() => emits('addNewVersion', row.versionSeriesInfo.info)"
-              @delete-version-series="() => emits('refreshReleaseList')" />
+              @delete-version-series="handleDeleteVersionSeriesSuccess" />
           </template>
         </CollapseCard>
       </template>
     </TableColumn>
     <TableColumn
-      col-key="name"
-      ellipsis
-      :filter="tableFilter?.name"
+      col-key="full_version"
+      :filter="tableFilter?.full_version"
+      :min-width="180"
       resizable
-      :title="t('版本名')"
-      :width="150">
-      <template #default="{ row }"> {{ row.name }} </template>
+      :title="t('版本号')">
+      <template #default="{ row }"> {{ row.full_version }} </template>
     </TableColumn>
     <TableColumn
+      class-name="version-packages-table-cell"
       col-key="packages"
+      :min-width="380"
       resizable
-      :title="t('版本文件（适配系统）')"
-      :width="380">
+      :resize="{ minWidth: 380, maxWidth: 600 }">
+      <template #title>
+        <span class="version-file-column-title">
+          {{ t('版本文件') }}
+          <DbIcon
+            v-bk-tooltips="{
+              content: t('一个版本可能含多个介质文件（不同 OS 适配），列表默认展示首文件，点击 +N 可展开全部'),
+              // placement: 'bottom',
+              theme: 'light',
+            }"
+            class="tip-icon"
+            type="attention" />
+        </span>
+      </template>
       <template #default="{ row }">
-        <div
-          v-for="(item, index) in row.packages"
-          :key="index"
-          class="os-limit-column">
-          <div
-            v-overflow-tips
-            class="version-file-name">
-            {{ item.name }}
-          </div>
-          <span class="ml-4 mr-4">(</span>
-          <div>
-            <span>{{ item.permit_os_type }}</span>
-            <span class="ml-4 mr-4">:</span>
-          </div>
-          <div class="version-tags">
-            <template v-if="item.permit_os.length > 0">
-              <TagBlock
-                :data="item.permit_os"
-                size="small" />
-            </template>
-            <template v-else>
-              <span class="all-text">{{ t('全部') }}</span>
-            </template>
-          </div>
-        </div>
+        <VersionFiles :data="row" />
       </template>
     </TableColumn>
     <TableColumn
       col-key="distribution_snapshot"
+      :min-width="100"
       resizable
-      :title="t('关联实例')"
-      :width="100">
+      :title="t('关联实例')">
       <template #default="{ row }"> {{ row.packages[0]?.instances }} </template>
     </TableColumn>
     <TableColumn
       col-key="enable"
       :filter="tableFilter?.enable"
-      resizable
-      :width="100">
+      :min-width="100"
+      resizable>
       <template #title>
         <span
           v-bk-tooltips="enableTips"
@@ -126,34 +126,26 @@
       </template>
     </TableColumn>
     <TableColumn
-      col-key="description"
-      :filter="tableFilter?.description"
-      resizable
-      :title="t('描述')"
-      :width="120">
-      <template #default="{ row }"> {{ row.description }} </template>
-    </TableColumn>
-    <TableColumn
       col-key="updater"
       :filter="tableFilter?.updator"
+      :min-width="120"
       resizable
-      :title="t('更新人')"
-      :width="120">
+      :title="t('更新人')">
       <template #default="{ row }"> {{ row.updater }} </template>
     </TableColumn>
     <TableColumn
       col-key="update_at"
+      :min-width="200"
       resizable
       sorter
-      :title="t('更新时间')"
-      :width="200">
+      :title="t('更新时间')">
       <template #default="{ row }"> {{ utcDisplayTime(row.update_at) }} </template>
     </TableColumn>
     <TableColumn
       col-key="id"
       fixed="right"
-      :title="t('操作')"
-      :width="150">
+      :min-width="150"
+      :title="t('操作')">
       <template #default="{ row }">
         <BkButton
           size="small"
@@ -187,7 +179,6 @@
   import { getDbVersionList, getVersionSeriesList } from '@services/source/version';
 
   import EmptyStatus from '@components/empty-status/EmptyStatus.vue';
-  import TagBlock from '@components/tag-block/Index.vue';
   import TextOverflowLayout from '@components/text-overflow-layout/Index.vue';
 
   import { random, utcDisplayTime } from '@utils';
@@ -199,6 +190,7 @@
   import EnableConfig from './components/EnableConfig.vue';
   import OperationHeader from './components/OperationHeader.vue';
   import RecommendConfig from './components/RecommendConfig.vue';
+  import VersionFiles from './components/VersionFiles.vue';
   import useTableFilter from './hooks/use-table-filter';
 
   interface Props {
@@ -218,6 +210,7 @@
     (e: 'addNewVersion', versionSeries: VersionSeries[number]): void;
     (e: 'editDbVersion', version: DbVersionModel): void;
     (e: 'refreshReleaseList'): void;
+    (e: 'refreshVersionList'): void;
     (e: 'filterValueChange', value: Record<string, any>): void;
   }
 
@@ -342,6 +335,14 @@
       immediate: true,
     },
   );
+
+  const rowClassNameFn = (data: { row: DbVersion }) =>
+    data.row.enable ? 'sub-version-table-row' : 'sub-version-table-row-disabled';
+
+  const handleDeleteVersionSeriesSuccess = () => {
+    emits('refreshVersionList');
+    emits('refreshReleaseList');
+  };
 
   const handleDeleteVersionSuccess = () => {
     fetchTableData();
@@ -508,6 +509,28 @@
 </script>
 <style lang="less">
   .sub-version-table-main {
+    width: 100%;
+
+    .version-name-table-cell {
+      max-width: 500px;
+      overflow: hidden;
+      box-sizing: border-box;
+
+      &[colspan] {
+        max-width: none;
+      }
+    }
+
+    .version-packages-table-cell {
+      max-width: 600px;
+      overflow: hidden;
+      box-sizing: border-box;
+
+      &[colspan] {
+        max-width: none;
+      }
+    }
+
     .t-table__header {
       th {
         background-color: #f0f1f5 !important;
@@ -517,8 +540,20 @@
         }
       }
 
-      .t-table__th-full_version {
-        padding-left: 32px !important;
+      // .t-table__th-full_version {
+      //   padding-left: 32px !important;
+      // }
+
+      .version-file-column-title {
+        .tip-icon {
+          font-size: 14px;
+          color: #c4c6cc;
+          cursor: pointer;
+
+          &:hover {
+            color: #3a84ff;
+          }
+        }
       }
     }
 
@@ -549,52 +584,89 @@
     }
 
     .version-display-column {
-      padding-left: 32px;
+      width: 100%;
+      padding-right: 14px;
+      padding-left: 14px;
       overflow: hidden;
 
       &.is-recommend {
         .tags-main {
-          display: block !important;
+          visibility: visible !important;
         }
       }
 
-      .display-text {
-        margin-right: 5px;
+      // 让 .tags-main 与 .set-recommended 在同一格子中堆叠，
+      // 列宽始终按更宽的按钮预留，避免 hover 切换时列宽抖动
+      &.text-overflow-layout {
+        .layout-append {
+          display: grid;
+          align-items: center;
+
+          > * {
+            grid-column: 1;
+            grid-row: 1;
+          }
+        }
+      }
+
+      .version-display-name {
+        margin-right: 6px;
+        overflow: hidden;
+        color: #3a84ff;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
       }
 
       .tags-main {
         display: flex;
         align-items: center;
+
+        .column-describe-tip {
+          margin-left: 6px;
+          font-size: 14px;
+          color: #c4c6cc;
+          cursor: pointer;
+
+          &:hover {
+            color: #3a84ff;
+          }
+        }
       }
 
       .set-recommended {
-        display: none;
+        cursor: pointer;
+        visibility: hidden;
+
+        &.is-recommended {
+          color: #ffb400;
+          visibility: visible !important;
+        }
+
+        &.is-disabled {
+          visibility: hidden !important;
+        }
       }
     }
 
     .os-limit-column {
       display: flex;
 
+      & ~ .os-limit-column {
+        margin-top: 4px;
+      }
+
       .version-file-name {
-        max-width: 100px;
+        margin-right: 6px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        flex: 1;
       }
 
       .version-tags {
-        flex: 1;
-
         .bk-tag {
-          max-width: 100px;
-        }
-
-        .dbm-tag-block,
-        .all-text {
-          &::after {
-            margin-left: 4px;
-            content: ')';
-          }
+          cursor: pointer;
         }
       }
     }
@@ -608,14 +680,18 @@
   .sub-version-table-row {
     &:hover {
       .version-display-column {
-        .tags-main {
-          display: none;
-        }
-
         .set-recommended {
-          display: block;
+          visibility: visible;
         }
       }
     }
+
+    .set-recommended {
+      cursor: pointer;
+    }
+  }
+
+  .sub-version-table-row-disabled {
+    color: #c4c6cc;
   }
 </style>

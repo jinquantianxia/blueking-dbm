@@ -9,20 +9,10 @@
     <template #header>
       <div class="header-main">
         <span>{{ props.isEdit ? t('编辑版本') : t('添加版本') }}</span>
-        <template v-if="dbVersion?.full_version">
-          <div class="split-line" />
-          <div class="db-version-display">
-            {{ dbVersion.full_version }}
-          </div>
-        </template>
-        <BkTag
-          class="ml-8"
-          theme="info">
-          {{ pkgLabel }}
-        </BkTag>
-        <BkTag theme="info">
-          {{ releaseLabel }}
-        </BkTag>
+        <div class="split-line" />
+        <div class="db-version-display">
+          {{ formModel.name ? formModel.name : t('未命名') }}
+        </div>
       </div>
     </template>
     <div class="content-main">
@@ -53,13 +43,23 @@
             <BkInput
               v-model="formModel.full_version"
               :disabled="!!dbVersion"
-              :placeholder="fullVersionPlaceholder" />
+              :placeholder="fullVersionPlaceholder"
+              @blur="handleResetDefaultVersionName" />
           </BkFormItem>
           <BkFormItem
             class="version-item"
             :label="t('版本名')"
             property="name"
             required>
+            <BkButton
+              v-if="formModel.name && formModel.name !== defaultAutoVersionName"
+              class="reset-default-btn"
+              size="small"
+              text
+              theme="primary"
+              @click="handleResetDefaultVersionName">
+              {{ t('重置为默认') }}
+            </BkButton>
             <BkInput v-model="formModel.name" />
           </BkFormItem>
           <BkFormItem
@@ -159,9 +159,7 @@
     dbType: string;
     dbVersion?: DbVersionModel;
     isEdit?: boolean;
-    pkgLabel?: string;
     pkgType: string;
-    releaseLabel?: string;
     releaseVersion?: ReleaseVersionModel;
     versionSeriesId?: number;
   }
@@ -171,8 +169,6 @@
   const props = withDefaults(defineProps<Props>(), {
     dbVersion: undefined,
     isEdit: false,
-    pkgLabel: '',
-    releaseLabel: '',
     releaseVersion: undefined,
     versionSeriesId: undefined,
   });
@@ -195,26 +191,42 @@
     version_series: 0,
   });
 
+  const dbPkgSixMaxMap: Record<string, Record<string, boolean>> = {
+    mysql: {
+      mysql: true,
+    },
+    redis: {
+      twemproxy: true,
+    },
+  };
+
   const formRef = ref();
   const versionFilesRef = ref<InstanceType<typeof VersionFiles>>();
   const formModel = ref(initFormModel());
 
-  const fullVersionPlaceholder = computed(() => props.dbType === 'mysql' ? t('请输入6位点分数字，如 1.2.1.0.0.1') : t('请输入3位点分数字，如 1.2.1'))
+  const isPureMysql = computed(() => props.dbType === 'mysql' && props.pkgType === 'mysql');
+
+  const isFullVersionSixMax = computed(() => {
+    return dbPkgSixMaxMap[props.dbType]?.[props.pkgType] ?? false;
+  });
+
+  const fullVersionPlaceholder = computed(() =>
+    isFullVersionSixMax.value ? t('请输入6位点分数字，如 1.2.1.0.0.1') : t('请输入3位点分数字，如 1.2.1'),
+  );
   const isApplied = computed(() => {
     const packages = props.dbVersion?.packages;
     return Array.isArray(packages) && packages.length > 0 && packages.some((item) => item.instances > 0);
   });
 
+  const defaultAutoVersionName = computed(() =>
+    isPureMysql.value
+      ? `${props.pkgType}_${props.releaseVersion?.name}_${formModel.value.full_version}`
+      : `${props.pkgType}_${formModel.value.full_version}`,
+  );
+
   const enableTip = `${t('启用：所有场景均可使用，如：部署、升级')}\n${t('停用：存量集群替换不受影响，其它场景不可使用。注意：停用将自动清除推荐')}`;
 
-  const formRules = {
-    version_series: [
-      {
-        message: t('请选择所属系列'),
-        trigger: 'blur',
-        validator: () => !!formModel.value.version_series,
-      }
-    ],
+  const formRules = computed(() => ({
     files: [
       {
         message: t('请补全版本文件信息'),
@@ -224,12 +236,21 @@
     ],
     full_version: [
       {
-        message: () => props.dbType === 'mysql' ? t('请输入6位点分数字，如 1.2.1.0.0.1') : t('请输入3位点分数字，如 1.2.1'),
+        message: () =>
+          isFullVersionSixMax.value ? t('请输入6位点分数字，如 1.2.1.0.0.1') : t('请输入3位点分数字，如 1.2.1'),
         trigger: 'blur',
-        validator: (value: string) => props.dbType === 'mysql' ? /^(\d+\.){5}\d+$/.test(value) : /^(\d+\.){2}\d+$/.test(value),
+        validator: (value: string) =>
+          isFullVersionSixMax.value ? /^(\d+\.){5}\d+$/.test(value) : /^(\d+\.){2}\d+$/.test(value),
       },
     ],
-  };
+    version_series: [
+      {
+        message: t('请选择所属系列'),
+        trigger: 'blur',
+        validator: () => !!formModel.value.version_series,
+      },
+    ],
+  }));
 
   const handleBatchCreatePackages = (data: { id: number }) => {
     const versionFilesInfo = versionFilesRef.value!.getValue()!;
@@ -302,6 +323,10 @@
       deep: true,
     },
   );
+
+  const handleResetDefaultVersionName = () => {
+    formModel.value.name = formModel.value.full_version ? defaultAutoVersionName.value : '';
+  };
 
   const handleSubmit = () => {
     formRef.value.validate().then(() => {
@@ -391,6 +416,14 @@
 
           .version-item {
             flex: 1;
+            position: relative;
+
+            .reset-default-btn {
+              position: absolute;
+              top: -22px;
+              right: 0;
+              font-size: 12px;
+            }
           }
         }
 

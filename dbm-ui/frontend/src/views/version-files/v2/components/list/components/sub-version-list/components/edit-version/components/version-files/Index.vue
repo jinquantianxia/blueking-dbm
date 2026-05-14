@@ -18,14 +18,15 @@
         :is-applied="isApplied"
         :selected-systems="selectedSystems"
         :selected-versions="selectedVersions"
-        @system-version-change="handleSystemVersionChange"
-        @delete="() => handleDeleteRow(index)">
+        @delete="() => handleDeleteRow(index)"
+        @system-version-change="handleSystemVersionChange">
       </VersionRow>
     </tbody>
   </table>
   <UploadFile
     :db-type="dbType"
     :pkg-type="pkgType"
+    :uploaded-file-names="uploadedFileNames"
     :version="version"
     @success="handleAdd" />
 </template>
@@ -70,6 +71,8 @@
       versions?: string[];
     }[]
   >([]);
+
+  const uploadedFileNames = computed(() => tableData.value.map((item) => item.name));
 
   watch(
     () => props.data,
