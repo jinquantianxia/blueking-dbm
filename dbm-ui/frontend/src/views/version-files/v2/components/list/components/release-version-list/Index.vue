@@ -2,11 +2,15 @@
   <div class="release-version-list-main">
     <div class="title-operate">
       <div class="title">{{ t('发行版') }}</div>
-      <DbIcon
-        v-bk-tooltips="t('新增发行版')"
-        class="add-icon"
-        type="add"
-        @click="() => handleEditRelease(false)" />
+      <AuthTemplate
+        action-id="package_manage"
+        :resource="dbType">
+        <DbIcon
+          v-bk-tooltips="t('新增发行版')"
+          class="add-icon"
+          type="add"
+          @click="() => handleEditRelease(false)" />
+      </AuthTemplate>
     </div>
     <div class="release-list">
       <ScrollFaker ref="scrollFakerRef">
@@ -19,11 +23,16 @@
           <div class="name">{{ item.name }}</div>
           <div class="count">{{ item.dbversion_count }}</div>
           <div class="item-operate">
-            <DbIcon
-              v-bk-tooltips="t('编辑')"
-              class="edit-icon mr-8"
-              type="edit"
-              @click.stop="() => handleEditRelease(true, item)" />
+            <AuthTemplate
+              action-id="package_manage"
+              :permission="item.permission.package_manage"
+              :resource="dbType">
+              <DbIcon
+                v-bk-tooltips="t('编辑')"
+                class="edit-icon mr-8"
+                type="edit"
+                @click.stop="() => handleEditRelease(true, item)" />
+            </AuthTemplate>
             <DeleteRelease
               :data="item"
               :db-type="dbType"
@@ -84,14 +93,14 @@
   const currentRelease = ref<ReleaseItem>();
   const releaseList = ref<ReleaseItem[]>([]);
 
-  const existedReleaseNames = computed(() => releaseList.value?.map((item) => item.name) || []);
+  const existedReleaseNames = computed(() => releaseList.value?.map((item) => item.name.toLowerCase()) || []);
 
   const VERSION_FILES_RELEASE_LIST_ACTIVE_INDEX = 'VERSION_FILES_RELEASE_LIST_ACTIVE_INDEX';
 
   const { run: runGetReleaseVersionList } = useRequest(getReleaseVersionList, {
     manual: true,
     onSuccess(data) {
-      releaseList.value = [...data].sort((a, b) =>
+      releaseList.value = data.sort((a, b) =>
         a.name.localeCompare(b.name, locale.value, {
           numeric: true,
           sensitivity: 'base',

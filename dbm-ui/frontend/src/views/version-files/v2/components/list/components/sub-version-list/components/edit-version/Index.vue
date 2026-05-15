@@ -32,7 +32,8 @@
           <VersionSeries
             v-model="formModel.version_series"
             :distribution-id="releaseVersion?.id"
-            :version-series-id="versionSeriesId" />
+            :version-series-id="versionSeriesId"
+            @add-version="() => emits('addVersion')" />
         </BkFormItem>
         <div class="version-row">
           <BkFormItem
@@ -84,7 +85,7 @@
             class="mb-8"
             closable
             theme="warning"
-            :title="t('请注意：不同文件间的操作系统版本不能重叠')" />
+            :title="t('任意两个文件不能覆盖同一个 OS 版本，否则部署版本时系统无法判定使用哪一份。')" />
           <VersionFiles
             ref="versionFilesRef"
             :data="dbVersion?.packages"
@@ -164,7 +165,10 @@
     versionSeriesId?: number;
   }
 
-  type Emits = (e: 'success', versionSeriesId: number) => void;
+  interface Emits {
+    (e: 'success', versionSeriesId: number): void;
+    (e: 'addVersion'): void;
+  }
 
   const props = withDefaults(defineProps<Props>(), {
     dbVersion: undefined,

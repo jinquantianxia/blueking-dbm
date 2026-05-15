@@ -22,6 +22,7 @@
     <template #extension>
       <EditSeries
         :distribution-id="distributionId"
+        :existed-list="existedNames"
         @confirm="handleConfirm">
         <div class="default-display-main">
           <DbIcon
@@ -46,10 +47,14 @@
     versionSeriesId?: number;
   }
 
+  type Emits = (e: 'addVersion') => void;
+
   const props = withDefaults(defineProps<Props>(), {
     distributionId: undefined,
     versionSeriesId: undefined,
   });
+
+  const emits = defineEmits<Emits>();
 
   const localValue = defineModel<number | undefined>({
     default: undefined,
@@ -60,6 +65,8 @@
   const editInputRef = ref();
   const isEdit = ref(false);
   const seriesList = ref<{ isNew?: boolean; label: string; value: number }[]>([]);
+
+  const existedNames = computed(() => seriesList.value.map((item) => item.label.toLocaleLowerCase()));
 
   const { run: runGetVersionSeriesList } = useRequest(getVersionSeriesList, {
     manual: true,
@@ -103,6 +110,7 @@
     nextTick(() => {
       localValue.value = id;
     });
+    emits('addVersion');
   };
 </script>
 <style lang="less">

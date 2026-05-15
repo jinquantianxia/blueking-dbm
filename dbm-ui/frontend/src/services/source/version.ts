@@ -67,9 +67,7 @@ export function getMysqlEngineList(params?: { limit?: number; offset?: number })
  * 发行版列表
  */
 export function getReleaseVersionList(params: { db_type: string; engine?: string; name?: string; pkg_type: string }) {
-  return http
-    .get<ReleaseVersionModel[]>(`${path}/distribution/`, params, { cache: 3000 })
-    .then((data) => data.map((item) => new ReleaseVersionModel(item)));
+  return http.get<ReleaseVersionModel[]>(`${path}/distribution/`, params, { cache: 3000 });
 }
 
 /**

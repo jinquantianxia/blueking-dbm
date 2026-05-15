@@ -12,12 +12,15 @@
         v-if="versionSeriesList && versionSeriesList.length"
         class="title-operate-main">
         <div class="title-operate-left">
-          <BkButton
+          <AuthButton
+            action-id="package_manage"
+            :permission="commonPermission"
+            :resource="dbType"
             theme="primary"
             @click="handleAddVersion">
             <DbIcon type="add" />
             <span class="ml-6">{{ t('添加版本') }}</span>
-          </BkButton>
+          </AuthButton>
           <div
             v-if="isPureMysql"
             class="main-title ml-12">
@@ -48,6 +51,8 @@
         class="versions-list-main">
         <TableList
           ref="subVersionRefs"
+          :db-type="dbType"
+          :permission="commonPermission"
           :version-series-list="versionSeriesList"
           @add-new-version="handleAddNewDbVersion"
           @delete-version-series="handleDeleteVersionSeries"
@@ -63,13 +68,16 @@
           type="empty">
           <span>{{ t('暂无版本') }}</span>
           <span class="ml-4 mr-4">,</span>
-          <BkButton
+          <AuthButton
+            action-id="package_manage"
+            :permission="commonPermission"
+            :resource="dbType"
             size="small"
             text
             theme="primary"
             @click="handleAddVersion">
             {{ t('立即添加') }}
-          </BkButton>
+          </AuthButton>
         </BkException>
       </div>
     </template>
@@ -82,6 +90,7 @@
     :pkg-type="pkgType"
     :release-version="releaseVersion"
     :version-series-id="currentVersionSeriesId"
+    @add-version="handleAddVersionSuccess"
     @success="handleEditVersionSuccess" />
 </template>
 <script setup lang="ts">
@@ -132,6 +141,7 @@
   const currentDbVersion = ref<DbVersionModel>();
 
   const isPureMysql = computed(() => props.dbType === 'mysql' && props.pkgType === 'mysql');
+  const commonPermission = computed(() => props.releaseVersion?.permission.package_manage || false);
 
   const { data: versionSeriesList, run: runGetVersionSeriesList } = useRequest(getVersionSeriesList, {
     manual: true,
@@ -164,6 +174,10 @@
       immediate: true,
     },
   );
+
+  const handleAddVersionSuccess = () => {
+    emits('refreshReleaseList');
+  };
 
   const handleDeleteVersionSeries = () => {
     fetchVersionSeriesList();

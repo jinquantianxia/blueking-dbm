@@ -114,7 +114,7 @@
       {
         message: t('该发行版已存在'),
         trigger: 'blur',
-        validator: (value: string) => !props.existedNameList.includes(value),
+        validator: (value: string) => !props.existedNameList.includes(value.toLocaleLowerCase()),
       },
     ],
   }));

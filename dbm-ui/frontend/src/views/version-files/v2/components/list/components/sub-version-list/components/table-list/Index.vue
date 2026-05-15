@@ -28,13 +28,20 @@
           <template #prepend>
             <RecommendConfig
               :data="row"
+              :db-type="dbType"
+              :permission="permission"
               @success="fetchTableData" />
           </template>
-          <div
-            class="version-display-name"
-            @click="() => handleEditDbVersion(row)">
-            {{ row.name }}
-          </div>
+          <AuthTemplate
+            action-id="package_manage"
+            :permission="permission"
+            :resource="dbType">
+            <div
+              class="version-display-name"
+              @click="() => handleEditDbVersion(row)">
+              {{ row.name }}
+            </div>
+          </AuthTemplate>
           <template #append>
             <span class="tags-main">
               <BkTag
@@ -62,9 +69,12 @@
           <template #title>
             <OperationHeader
               :data="row.versionSeriesInfo.info"
+              :db-type="dbType"
               :db-version-list-count="row.versionSeriesInfo.children.length"
+              :existed-version-name-list="totalVersionNames"
+              :permission="permission"
               @add-new-version="() => emits('addNewVersion', row.versionSeriesInfo.info)"
-              @delete-version-series="handleDeleteVersionSeriesSuccess" />
+              @edit-version-series="handleEditVersionSeriesSuccess" />
           </template>
         </CollapseCard>
       </template>
@@ -122,6 +132,8 @@
       <template #default="{ row }">
         <EnableConfig
           :data="row"
+          :db-type="dbType"
+          :permission="permission"
           @success="fetchTableData" />
       </template>
     </TableColumn>
@@ -147,16 +159,24 @@
       :min-width="150"
       :title="t('操作')">
       <template #default="{ row }">
-        <BkButton
+        <AuthButton
+          action-id="package_manage"
+          :permission="permission"
+          :resource="dbType"
           size="small"
           text
           theme="primary"
           @click="() => handleEditDbVersion(row)">
           {{ t('编辑') }}
-        </BkButton>
-        <DownloadPackage :data="row" />
+        </AuthButton>
+        <DownloadPackage
+          :data="row"
+          :db-type="dbType"
+          :permission="permission" />
         <DeleteVersion
           :data="row"
+          :db-type="dbType"
+          :permission="permission"
           @success="handleDeleteVersionSuccess" />
       </template>
     </TableColumn>
@@ -194,6 +214,8 @@
   import useTableFilter from './hooks/use-table-filter';
 
   interface Props {
+    dbType: string;
+    permission: boolean;
     versionSeriesList?: VersionSeries;
   }
 
@@ -237,29 +259,33 @@
   const tableFilterValue = ref<Record<string, any>>({});
   const isSearching = ref(true);
 
+  const totalVersionNames = computed(() => props.versionSeriesList.map((item) => item.name.toLocaleLowerCase()));
+
   const { loading: tableLoading, run: runGetDbVersionList } = useRequest(getDbVersionList, {
     manual: true,
-    onSuccess(list) {
+    onSuccess(data) {
       const versionSeriesMap = props.versionSeriesList.reduce<
         Record<number, { children: DbVersion[] } & VersionSeries[number]>
       >((acc, item) => Object.assign(acc, { [item.id]: { children: [], info: item } }), {});
-      list.forEach((item) => {
+      data.forEach((item) => {
         const newItem = Object.assign(item, {
           createAtTimestamp: new Date(item.create_at).getTime(),
         });
         versionSeriesMap[item.version_series].children.push(newItem);
       });
-
+      const nameIdList = props.versionSeriesList
+        .map((item) => ({ id: item.id, name: item.name }))
+        .sort((a, b) => compareName(a.name, b.name));
       const handleList: DbVersion[] = [];
-      Object.keys(versionSeriesMap).forEach((key) => {
-        const childrenList = versionSeriesMap[Number(key)].children.sort((a, b) =>
+      nameIdList.forEach((nameIdObj) => {
+        const childrenList = versionSeriesMap[nameIdObj.id].children.sort((a, b) =>
           compareVersion(a.full_version, b.full_version),
         );
         if (childrenList.length > 0) {
           childrenList.forEach((item, index) => {
             if (index === 0) {
               handleList.push(
-                Object.assign({ uuid: random() }, item, { versionSeriesInfo: versionSeriesMap[Number(key)] }),
+                Object.assign({ uuid: random() }, item, { versionSeriesInfo: versionSeriesMap[nameIdObj.id] }),
               );
             }
             if (item.packages.length > 0) {
@@ -272,7 +298,7 @@
           handleList.push(
             Object.assign(
               { uuid: random() },
-              { versionSeriesInfo: versionSeriesMap[Number(key)] },
+              { versionSeriesInfo: versionSeriesMap[nameIdObj.id] },
             ) as unknown as DbVersion,
           );
         }
@@ -336,10 +362,62 @@
     },
   );
 
+  /** 按版本名排序：同系列内版本号从高到低（如 MySQL-10 → MySQL-8.0 → MySQL-5.7）；支持无中划线（如 MySQL8.0、mysql10） */
+  const compareName = (a: string, b: string): number => {
+    const parse = (raw: string) => {
+      const trimmed = raw.trim();
+      // 取末尾连续「数字.数字…」作为版本段，前面为产品前缀（可有/可无中划线、下划线）
+      const verMatch = trimmed.match(/(\d+(?:\.\d+)*)$/);
+      if (verMatch && verMatch.index !== undefined && verMatch[1].length > 0) {
+        const prefix = trimmed
+          .slice(0, verMatch.index)
+          .replace(/[-_.\s]+$/u, '')
+          .toLowerCase();
+        return {
+          prefix,
+          raw: trimmed,
+          segments: verMatch[1].split('.').map((part) => Number.parseInt(part, 10)),
+        };
+      }
+      return {
+        prefix: trimmed.toLowerCase(),
+        raw: trimmed,
+        segments: [] as number[],
+      };
+    };
+
+    const compareSegmentsAsc = (sa: number[], sb: number[]): number => {
+      const len = Math.max(sa.length, sb.length);
+      for (let i = 0; i < len; i += 1) {
+        const na = sa[i] ?? 0;
+        const nb = sb[i] ?? 0;
+        if (Number.isNaN(na) || Number.isNaN(nb)) {
+          return 0;
+        }
+        if (na !== nb) {
+          return na - nb;
+        }
+      }
+      return 0;
+    };
+
+    const pa = parse(a);
+    const pb = parse(b);
+    const prefixCmp = pa.prefix.localeCompare(pb.prefix);
+    if (prefixCmp !== 0) {
+      return prefixCmp;
+    }
+    const segCmp = compareSegmentsAsc(pa.segments, pb.segments);
+    if (segCmp !== 0) {
+      return -segCmp;
+    }
+    return pa.raw.localeCompare(pb.raw, undefined, { sensitivity: 'base' });
+  };
+
   const rowClassNameFn = (data: { row: DbVersion }) =>
     data.row.enable ? 'sub-version-table-row' : 'sub-version-table-row-disabled';
 
-  const handleDeleteVersionSeriesSuccess = () => {
+  const handleEditVersionSeriesSuccess = () => {
     emits('refreshVersionList');
     emits('refreshReleaseList');
   };
@@ -405,7 +483,7 @@
           return dayjs(b[payload.sortBy]).unix() - dayjs(a[payload.sortBy]).unix();
         });
       } else {
-        childrenList.sort((a: any, b: any) => compareVersion(a.full_version, b.full_version));
+        childrenList.sort((a: any, b: any) => compareName(a.name, b.name));
       }
     };
 

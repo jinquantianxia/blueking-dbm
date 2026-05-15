@@ -24,16 +24,26 @@
           top: `${operatePanelPosition.top}px`,
           left: `${operatePanelPosition.left}px`,
         }">
-        <div
-          class="operate-item add-veriosn"
-          @click.stop="handleAddVersion">
-          {{ t('添加版本') }}
-        </div>
-        <div
-          class="operate-item"
-          @click.stop="handleEditName">
-          {{ t('编辑系列') }}
-        </div>
+        <AuthTemplate
+          action-id="package_manage"
+          :permission="permission"
+          :resource="dbType">
+          <div
+            class="operate-item add-veriosn"
+            @click.stop="handleAddVersion">
+            {{ t('添加版本') }}
+          </div>
+        </AuthTemplate>
+        <AuthTemplate
+          action-id="package_manage"
+          :permission="permission"
+          :resource="dbType">
+          <div
+            class="operate-item"
+            @click.stop="handleEditName">
+            {{ t('编辑系列') }}
+          </div>
+        </AuthTemplate>
         <BkPopConfirm
           :confirm-config="{
             theme: 'danger',
@@ -47,17 +57,22 @@
           trigger="click"
           width="280"
           @confirm="handleDeleteVersionSeries">
-          <div
-            v-bk-tooltips="{
-              content: t('该版本系列下存在 n 个版本，请删除后再操作', { n: dbVersionListCount }),
-              placement: 'right',
-              disabled: dbVersionListCount === 0,
-            }"
-            class="operate-item"
-            :class="{ 'is-disabled': dbVersionListCount > 0 }"
-            @click.stop>
-            {{ t('删除系列') }}
-          </div>
+          <AuthTemplate
+            action-id="package_manage"
+            :permission="permission"
+            :resource="dbType">
+            <div
+              v-bk-tooltips="{
+                content: t('该版本系列下存在 n 个版本，请删除后再操作', { n: dbVersionListCount }),
+                placement: 'right',
+                disabled: dbVersionListCount === 0,
+              }"
+              class="operate-item"
+              :class="{ 'is-disabled': dbVersionListCount > 0 }"
+              @click.stop>
+              {{ t('删除系列') }}
+            </div>
+          </AuthTemplate>
         </BkPopConfirm>
       </div>
     </div>
@@ -68,6 +83,7 @@
     class="operation-header-edit-series-main"
     :data="versionName"
     :distribution-id="data?.distribution"
+    :existed-list="existedVersionNameList"
     mode="update"
     :series-id="data?.id"
     @confirm="handleConfirmChangeVersionName" />
@@ -88,17 +104,21 @@
       id: number;
       name: string;
     };
+    dbType: string;
     dbVersionListCount?: number;
+    existedVersionNameList: string[];
+    permission?: boolean;
   }
 
   interface Emits {
     (e: 'addNewVersion'): void;
-    (e: 'deleteVersionSeries'): void;
+    (e: 'editVersionSeries'): void;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     data: undefined,
     dbVersionListCount: 0,
+    permission: true,
   });
 
   const emits = defineEmits<Emits>();
@@ -117,7 +137,7 @@
     manual: true,
     onSuccess: () => {
       messageSuccess(t('操作成功'));
-      emits('deleteVersionSeries');
+      emits('editVersionSeries');
     },
   });
 
@@ -140,6 +160,7 @@
 
   const handleConfirmChangeVersionName = (id: number, name: string) => {
     versionName.value = name;
+    emits('editVersionSeries');
   };
 
   const handleEditName = () => {

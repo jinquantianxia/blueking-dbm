@@ -11,10 +11,15 @@
       <BkSelect
         v-model="localData.permit_os_type"
         :clearable="false"
+        ext-cls="version-files-version-row-select"
         @change="(value) => handleSystemChange(value)">
         <BkOption
           v-for="system in systemList"
           :key="system.value"
+          v-bk-tooltips="{
+            content: t('该 OS 已被其它文件占用'),
+            disabled: !(selectedAllSystems.has(system.value) && selectedAllVersions[system.value]?.has('all')),
+          }"
           :disabled="selectedAllSystems.has(system.value) && selectedAllVersions[system.value]?.has('all')"
           :label="system.label"
           :value="system.value" />
@@ -80,6 +85,10 @@
         <BkOption
           v-for="version in versionList"
           :key="version.value"
+          v-bk-tooltips="{
+            content: t('该 OS 版本已被其它文件占用'),
+            disabled: !selectedAllVersions[localData.permit_os_type]?.has(version.value),
+          }"
           :disabled="selectedAllVersions[localData.permit_os_type]?.has(version.value)"
           :label="version.label"
           :value="version.value" />
@@ -402,5 +411,9 @@
         border-color: #ea3636;
       }
     }
+  }
+
+  .version-files-version-row-select {
+    z-index: 99999;
   }
 </style>

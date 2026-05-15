@@ -18,9 +18,13 @@
         </span>
       </div>
     </template>
-    <BkSwitcher
+    <AuthSwitcher
+      action-id="package_manage"
       :before-change="handleBeforeChange"
+      :disabled="!permission"
       :model-value="localValue"
+      :permission="permission"
+      :resource="dbType"
       size="small"
       theme="primary" />
   </BkPopConfirm>
@@ -36,6 +40,8 @@
 
   interface Props {
     data: DbVersionModel;
+    dbType: string;
+    permission: boolean;
   }
 
   type Emits = (e: 'success') => void;
@@ -69,6 +75,10 @@
 
   const handleBeforeChange = () => {
     return new Promise<boolean>((resolve, reject) => {
+      if (!props.permission) {
+        reject(false);
+        return;
+      }
       handleSetEnableResolver = resolve;
       handleSetEnableRejecter = reject;
     });

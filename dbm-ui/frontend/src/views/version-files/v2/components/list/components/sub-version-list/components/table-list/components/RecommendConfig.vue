@@ -1,10 +1,15 @@
 <template>
-  <DbIcon
-    v-bk-tooltips="{ content: toolTipContent }"
-    class="set-recommended mr-6"
-    :class="[{ 'is-recommended': data.recommend, 'is-disabled': !data.enable }]"
-    :type="data.recommend ? 'star-fill' : 'star'"
-    @click="handleSetRecommended" />
+  <AuthTemplate
+    action-id="package_manage"
+    :permission="permission"
+    :resource="dbType">
+    <DbIcon
+      v-bk-tooltips="{ content: toolTipContent }"
+      class="set-recommended mr-6"
+      :class="[{ 'is-recommended': data.recommend, 'is-disabled': !data.enable }]"
+      :type="data.recommend ? 'star-fill' : 'star'"
+      @click="handleSetRecommended" />
+  </AuthTemplate>
 </template>
 
 <script setup lang="ts">
@@ -18,6 +23,8 @@
 
   interface Props {
     data: DbVersionModel;
+    dbType: string;
+    permission: boolean;
   }
 
   type Emits = (e: 'success') => void;
