@@ -47,6 +47,10 @@
     versionSeriesId?: number;
   }
 
+  interface Exposes {
+    getCurrentLabel: () => string;
+  }
+
   type Emits = (e: 'addVersion') => void;
 
   const props = withDefaults(defineProps<Props>(), {
@@ -67,6 +71,9 @@
   const seriesList = ref<{ isNew?: boolean; label: string; value: number }[]>([]);
 
   const existedNames = computed(() => seriesList.value.map((item) => item.label.toLocaleLowerCase()));
+  const currentVersionLabel = computed(
+    () => seriesList.value.find((item) => item.value === localValue.value)?.label || '',
+  );
 
   const { run: runGetVersionSeriesList } = useRequest(getVersionSeriesList, {
     manual: true,
@@ -112,6 +119,12 @@
     });
     emits('addVersion');
   };
+
+  defineExpose<Exposes>({
+    getCurrentLabel() {
+      return currentVersionLabel.value;
+    },
+  });
 </script>
 <style lang="less">
   .default-display-main {

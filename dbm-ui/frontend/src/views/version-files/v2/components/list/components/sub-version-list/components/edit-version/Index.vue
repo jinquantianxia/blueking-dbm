@@ -30,6 +30,7 @@
             <span class="series-tip">({{ t('同一版本系列代表核心功能兼容，支持原地升级') }})</span>
           </template>
           <VersionSeries
+            ref="versionSeriesRef"
             v-model="formModel.version_series"
             :distribution-id="releaseVersion?.id"
             :version-series-id="versionSeriesId"
@@ -215,6 +216,7 @@
 
   const formRef = ref();
   const versionFilesRef = ref<InstanceType<typeof VersionFiles>>();
+  const versionSeriesRef = ref<InstanceType<typeof VersionSeries>>();
   const formModel = ref(initFormModel());
 
   const isPureMysql = computed(() => props.dbType === 'mysql' && props.pkgType === 'mysql');
@@ -297,6 +299,7 @@
 
   const handleBatchCreatePackages = (data: { id: number }) => {
     const versionFilesInfo = versionFilesRef.value!.getValue()!;
+    const seriesLabel = versionSeriesRef.value!.getCurrentLabel();
     const updateParams = versionFilesInfo.map((item) => ({
       ...item,
       db_type: props.dbType,
@@ -305,7 +308,7 @@
       permit_os: item.permit_os.length === 1 && item.permit_os[0] === 'all' ? [] : item.permit_os,
       permit_os_type: item.permit_os_type,
       pkg_type: props.pkgType,
-      version: formModel.value.full_version,
+      version: seriesLabel,
     }));
     runBatchCreatePackages({ packages: updateParams });
   };
