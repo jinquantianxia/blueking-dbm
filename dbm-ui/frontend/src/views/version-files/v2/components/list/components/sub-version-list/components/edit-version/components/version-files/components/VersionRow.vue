@@ -12,7 +12,7 @@
         v-model="localData.permit_os_type"
         :clearable="false"
         ext-cls="version-files-version-row-select"
-        @change="(value) => handleSystemChange(value)">
+        @change="(value) => handleOsTypeChange(value)">
         <BkOption
           v-for="system in systemList"
           :key="system.value"
@@ -34,8 +34,8 @@
         multiple
         multiple-mode="tag"
         show-all
-        @change="handleVersionChange"
-        @toggle="handleVersionToggle">
+        @change="handleOsVersionChange"
+        @toggle="handleOsVersionToggle">
         <template #trigger>
           <div
             class="version-display-trigger"
@@ -133,7 +133,8 @@
 
   interface Emits {
     (e: 'delete'): void;
-    (e: 'systemVersionChange'): void;
+    (e: 'systemOsTypeChange', isInit: boolean): void;
+    (e: 'systemOsVersionChange'): void;
   }
 
   interface Exposes {
@@ -192,7 +193,7 @@
         localData.value.permit_os_type = props.data.permit_os_type || '';
         if (localData.value.permit_os_type) {
           setTimeout(() => {
-            handleSystemChange(localData.value.permit_os_type, true);
+            handleOsTypeChange(localData.value.permit_os_type, true);
           });
         }
       }
@@ -216,7 +217,7 @@
             localData.value.permit_os_type = '';
             localData.value.permit_os = [];
             versionList.value = [];
-            emits('systemVersionChange');
+            emits('systemOsTypeChange', true);
             return;
           }
 
@@ -235,9 +236,9 @@
     },
   );
 
-  const handleSystemChange = (value: string, isInit = false) => {
+  const handleOsTypeChange = (value: string, isInit = false) => {
     nextTick(() => {
-      emits('systemVersionChange');
+      emits('systemOsTypeChange', isInit);
     });
     if (existVersionList.value.length > 0) {
       const exisetVersionSet = new Set(existVersionList.value);
@@ -265,9 +266,10 @@
     }
   };
 
-  const handleVersionChange = () => {
+  const handleOsVersionChange = () => {
+    emits('systemOsVersionChange');
     nextTick(() => {
-      emits('systemVersionChange');
+      emits('systemOsTypeChange', false);
     });
   };
 
@@ -277,14 +279,14 @@
     }
   };
 
-  const handleVersionToggle = (isShow: boolean) => {
+  const handleOsVersionToggle = (isShow: boolean) => {
     isShowVersionPanel.value = isShow;
   };
 
   const handleVersionDelete = (index: number) => {
     localData.value.permit_os.splice(index, 1);
     nextTick(() => {
-      emits('systemVersionChange');
+      emits('systemOsTypeChange', false);
     });
   };
 

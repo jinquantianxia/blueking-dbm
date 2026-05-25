@@ -5269,5 +5269,6 @@
   "OS版本": "OS Version",
   "该 OS 已被其它文件占用": "This OS is already used by another file",
   "该 OS 版本已被其它文件占用": "This OS version is already used by another file",
+  "当前无变更，请先修改内容": "No changes, please modify the content first",
   "这行勿动！新增翻译请在上一行添加！": ""
 }

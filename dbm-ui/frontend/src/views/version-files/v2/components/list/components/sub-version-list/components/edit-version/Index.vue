@@ -93,7 +93,8 @@
             :db-type="dbType"
             :is-applied="isApplied"
             :pkg-type="pkgType"
-            :version="formModel.full_version" />
+            :version="formModel.full_version"
+            @value-change="handleVersionFilesValueChange" />
         </BkFormItem>
         <BkFormItem
           :label="t('描述')"
@@ -122,10 +123,13 @@
       </BkForm>
       <div class="operate-main">
         <BkButton
+          v-bk-tooltips="{
+            disabled: !confirmDisabled,
+            content: t('当前无变更，请先修改内容'),
+          }"
           class="operate-button"
-          :loading="
-            createDbVersionLoading || batchCreatePackagesLoading || updateDbVersionLoading || batchDeletePackagesLoading
-          "
+          :disabled="confirmDisabled || confirmLoading"
+          :loading="confirmLoading"
           theme="primary"
           @click="handleSubmit">
           {{ t('确定') }}
@@ -196,14 +200,15 @@
     version_series: 0,
   });
 
-  const initFormModelFromProps = () => {
-    formModel.value.version_series = props.dbVersion!.version_series;
-    formModel.value.full_version = props.dbVersion!.full_version;
-    formModel.value.name = props.dbVersion!.name;
-    formModel.value.phase = props.dbVersion!.phase;
-    formModel.value.description = props.dbVersion!.description;
-    formModel.value.enable = props.dbVersion!.enable;
-  };
+  const initFormModelFromProps = () => ({
+    description: props.dbVersion!.description,
+    enable: props.dbVersion!.enable,
+    files: ['default'],
+    full_version: props.dbVersion!.full_version,
+    name: props.dbVersion!.name,
+    phase: props.dbVersion!.phase,
+    version_series: props.dbVersion!.version_series,
+  });
 
   const dbPkgSixMaxMap: Record<string, Record<string, boolean>> = {
     mysql: {
@@ -214,10 +219,13 @@
     },
   };
 
+  const enableTip = `${t('启用：所有场景均可使用，如：部署、升级')}\n${t('停用：存量集群替换不受影响，其它场景不可使用。注意：停用将自动清除推荐')}`;
+
   const formRef = ref();
   const versionFilesRef = ref<InstanceType<typeof VersionFiles>>();
   const versionSeriesRef = ref<InstanceType<typeof VersionSeries>>();
   const formModel = ref(initFormModel());
+  const confirmDisabled = ref(true);
 
   const isPureMysql = computed(() => props.dbType === 'mysql' && props.pkgType === 'mysql');
 
@@ -239,7 +247,14 @@
       : `${props.pkgType}_${formModel.value.full_version}`,
   );
 
-  const enableTip = `${t('启用：所有场景均可使用，如：部署、升级')}\n${t('停用：存量集群替换不受影响，其它场景不可使用。注意：停用将自动清除推荐')}`;
+  const confirmLoading = computed(() => {
+    return (
+      createDbVersionLoading.value ||
+      batchCreatePackagesLoading.value ||
+      updateDbVersionLoading.value ||
+      batchDeletePackagesLoading.value
+    );
+  });
 
   const formRules = computed(() => ({
     files: [
@@ -338,16 +353,13 @@
   });
 
   watch(
-    () => props.dbVersion,
+    () => [props.isEdit, props.dbVersion],
     () => {
-      if (props.dbVersion) {
-        initFormModelFromProps();
+      if (props.isEdit) {
+        formModel.value = initFormModelFromProps();
       } else {
         formModel.value = initFormModel();
       }
-      setTimeout(() => {
-        window.changeConfirm = false;
-      });
     },
     {
       deep: true,
@@ -356,14 +368,40 @@
   );
 
   watch(
-    formModel,
+    () => formModel,
     () => {
-      window.changeConfirm = true;
+      if (props.isEdit) {
+        confirmDisabled.value = _.isEqual(formModel.value, initFormModelFromProps());
+      } else {
+        confirmDisabled.value = _.isEqual(formModel.value, initFormModel());
+      }
     },
     {
       deep: true,
     },
   );
+
+  watch(isShow, () => {
+    confirmDisabled.value = true;
+  });
+
+  watch(
+    confirmDisabled,
+    () => {
+      if (!confirmDisabled.value) {
+        window.changeConfirm = true;
+      } else {
+        window.changeConfirm = false;
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
+
+  const handleVersionFilesValueChange = () => {
+    confirmDisabled.value = false;
+  };
 
   const handleResetDefaultVersionName = () => {
     formModel.value.name = formModel.value.full_version ? defaultAutoVersionName.value : '';
@@ -416,7 +454,7 @@
   const handleCancel = () => {
     isShow.value = false;
     if (props.isEdit) {
-      initFormModelFromProps();
+      formModel.value = initFormModelFromProps();
       return;
     }
     formModel.value = initFormModel();

@@ -20,7 +20,8 @@
         :selected-systems="selectedSystems"
         :selected-versions="selectedVersions"
         @delete="() => handleDeleteRow(index)"
-        @system-version-change="handleSystemVersionChange">
+        @system-os-type-change="handleOsTypeChange"
+        @system-os-version-change="handleOsVersionChange">
       </VersionRow>
     </tbody>
   </table>
@@ -47,6 +48,8 @@
     version: string;
   }
 
+  type Emits = (e: 'valueChange') => void;
+
   interface Exposes {
     getValue: () => ReturnType<InstanceType<typeof VersionRow>['getValue']>[] | null;
   }
@@ -55,6 +58,8 @@
     data: undefined,
     isApplied: false,
   });
+
+  const emits = defineEmits<Emits>();
 
   const { t } = useI18n();
 
@@ -89,7 +94,10 @@
     { immediate: true },
   );
 
-  const handleSystemVersionChange = () => {
+  const handleOsTypeChange = (isInit: boolean) => {
+    if (!isInit) {
+      emits('valueChange');
+    }
     selectedSystems.value.clear();
     selectedVersions.value = {};
     versionRowRefs.value.forEach((item) => {
@@ -109,6 +117,10 @@
     });
   };
 
+  const handleOsVersionChange = () => {
+    emits('valueChange');
+  };
+
   const handleAdd = (fileInfo: { md5: string; name: string; path: string; size: number }) => {
     tableData.value.push({
       ...fileInfo,
@@ -118,6 +130,7 @@
 
   const handleDeleteRow = (index: number) => {
     tableData.value.splice(index, 1);
+    emits('valueChange');
   };
 
   defineExpose<Exposes>({
