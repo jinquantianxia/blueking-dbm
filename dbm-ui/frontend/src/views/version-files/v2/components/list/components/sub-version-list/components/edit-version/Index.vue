@@ -34,7 +34,8 @@
             v-model="formModel.version_series"
             :distribution-id="releaseVersion?.id"
             :version-series-id="versionSeriesId"
-            @add-version="() => emits('addVersion')" />
+            @add-version="() => emits('addVersion')"
+            @value-change="handleValueChange" />
         </BkFormItem>
         <div class="version-row">
           <BkFormItem
@@ -46,7 +47,8 @@
               v-model="formModel.full_version"
               :disabled="!!dbVersion"
               :placeholder="fullVersionPlaceholder"
-              @blur="handleResetDefaultVersionName" />
+              @blur="handleResetDefaultVersionName"
+              @input="handleValueChange" />
           </BkFormItem>
           <BkFormItem
             class="version-item"
@@ -62,14 +64,18 @@
               @click="handleResetDefaultVersionName">
               {{ t('重置为默认') }}
             </BkButton>
-            <BkInput v-model="formModel.name" />
+            <BkInput
+              v-model="formModel.name"
+              @input="handleValueChange" />
           </BkFormItem>
           <BkFormItem
             class="version-item"
             :label="t('版本阶段')"
             property="phase"
             required>
-            <VersionStage v-model="formModel.phase" />
+            <VersionStage
+              v-model="formModel.phase"
+              @value-change="handleValueChange" />
           </BkFormItem>
         </div>
         <BkFormItem
@@ -94,7 +100,7 @@
             :is-applied="isApplied"
             :pkg-type="pkgType"
             :version="formModel.full_version"
-            @value-change="handleVersionFilesValueChange" />
+            @value-change="handleValueChange" />
         </BkFormItem>
         <BkFormItem
           :label="t('描述')"
@@ -104,7 +110,8 @@
             :placeholder="t('请输入子版本描述，如：“修复 XX 漏洞”“优化性能”')"
             :resize="false"
             :rows="5"
-            type="textarea" />
+            type="textarea"
+            @input="handleValueChange" />
         </BkFormItem>
         <BkFormItem
           property="enable"
@@ -118,7 +125,8 @@
           </template>
           <BkSwitcher
             v-model="formModel.enable"
-            theme="primary" />
+            theme="primary"
+            @change="handleValueChange" />
         </BkFormItem>
       </BkForm>
       <div class="operate-main">
@@ -368,16 +376,12 @@
   );
 
   watch(
-    () => formModel,
+    confirmDisabled,
     () => {
-      if (props.isEdit) {
-        confirmDisabled.value = _.isEqual(formModel.value, initFormModelFromProps());
-      } else {
-        confirmDisabled.value = _.isEqual(formModel.value, initFormModel());
-      }
+      window.changeConfirm = confirmDisabled.value;
     },
     {
-      deep: true,
+      immediate: true,
     },
   );
 
@@ -385,21 +389,7 @@
     confirmDisabled.value = true;
   });
 
-  watch(
-    confirmDisabled,
-    () => {
-      if (!confirmDisabled.value) {
-        window.changeConfirm = true;
-      } else {
-        window.changeConfirm = false;
-      }
-    },
-    {
-      immediate: true,
-    },
-  );
-
-  const handleVersionFilesValueChange = () => {
+  const handleValueChange = () => {
     confirmDisabled.value = false;
   };
 

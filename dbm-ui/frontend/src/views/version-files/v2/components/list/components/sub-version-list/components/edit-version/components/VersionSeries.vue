@@ -3,7 +3,8 @@
     v-model="localValue"
     :clearable="false"
     :disabled="!!versionSeriesId"
-    filterable>
+    filterable
+    @change="handleValueChange">
     <BkOption
       v-for="system in seriesList"
       :key="system.value"
@@ -51,7 +52,10 @@
     getCurrentLabel: () => string;
   }
 
-  type Emits = (e: 'addVersion') => void;
+  interface Emits {
+    (e: 'addVersion'): void;
+    (e: 'valueChange'): void;
+  }
 
   const props = withDefaults(defineProps<Props>(), {
     distributionId: undefined,
@@ -107,6 +111,10 @@
       immediate: true,
     },
   );
+
+  const handleValueChange = () => {
+    emits('valueChange');
+  };
 
   const handleConfirm = (id: number, name: string) => {
     seriesList.value.push({
