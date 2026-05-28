@@ -12,6 +12,7 @@
     <SubVersionList
       ref="subVersionListRef"
       :db-type="dbType"
+      :has-package-manage-permission="hasPackageManagePermission"
       :pkg-type="pkgType"
       :release-version="activeReleaseVersion"
       @refresh-release-list="handleRefreshReleaseList" />
@@ -30,6 +31,7 @@
 
   interface Props {
     dbType: string;
+    hasPackageManagePermission: boolean;
     pkgLabelMap: Record<string, string>;
     pkgType: string;
     tabs: TabItem[];
@@ -52,7 +54,7 @@
   });
 
   watch(
-    () => [props.dbType, props.pkgType],
+    () => [props.dbType, props.pkgType, props.tabs],
     () => {
       activeReleaseVersion.value = undefined;
       if (!isPureMysql.value) {

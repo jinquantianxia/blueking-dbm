@@ -303,7 +303,6 @@
           );
         }
       });
-
       localTableData = _.cloneDeep(handleList);
       localBeforeSortTableData = localTableData;
       if (collapseIdSet.value.size > 0) {
@@ -315,6 +314,12 @@
         tableData.value = handleList;
       }
       emits('listChange', handleList.filter((item) => !item.versionSeriesInfo).length);
+      // 针对过滤场景下操作后重新获取数据，需要等待数据更新后重新触发过滤
+      setTimeout(() => {
+        if (Object.keys(tableFilterValue.value).length > 0) {
+          handleFilterChange({ filter: tableFilterValue.value });
+        }
+      });
     },
   });
 
