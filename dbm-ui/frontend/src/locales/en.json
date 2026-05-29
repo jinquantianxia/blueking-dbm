@@ -5301,5 +5301,6 @@
   "只允许字母 / 数字 / 下划线 / 中划线": "Only letters / numbers / underscores / hyphens are allowed",
   "该标识已存在": "This identifier already exists",
   "该包类型尚无版本，可调整位数；一旦添加版本即冻结": "This package type has no versions. The number of digits can be adjusted; once a version is added, it is frozen.",
+  "该包类型下存在 n 个发行版，请删除后再操作": "There are {n} distributions under this package type. Delete them before continuing.",
   "这行勿动！新增翻译请在上一行添加！": ""
 }

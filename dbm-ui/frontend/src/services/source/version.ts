@@ -234,6 +234,7 @@ export function getPkgTypeList(params: { db_type: string }) {
   return http.get<
     {
       name: string;
+      related_distributions: number;
       related_versions: number;
       value: string;
       version_num: number;

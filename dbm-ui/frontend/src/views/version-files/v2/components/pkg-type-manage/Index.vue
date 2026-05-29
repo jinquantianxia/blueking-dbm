@@ -73,10 +73,15 @@
               </BkButton>
               <BkButton
                 v-bk-tooltips="{
-                  content: t('该包类型下存在 n 个版本，请删除后再操作', { n: data.related_versions }),
-                  disabled: data.related_versions === 0,
+                  content:
+                    data.related_versions > 0
+                      ? t('该包类型下存在 n 个版本，请删除后再操作', { n: data.related_versions })
+                      : data.related_distributions > 0
+                        ? t('该包类型下存在 n 个发行版，请删除后再操作', { n: data.related_distributions })
+                        : '',
+                  disabled: data.related_versions === 0 && data.related_distributions === 0,
                 }"
-                :disabled="data.related_versions > 0"
+                :disabled="data.related_versions > 0 || data.related_distributions > 0"
                 text
                 theme="primary"
                 @click="() => handleConfirmDelete(data)">

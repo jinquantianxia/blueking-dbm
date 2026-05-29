@@ -95,6 +95,7 @@
   interface Props {
     data?: {
       name: string;
+      related_distributions: number;
       related_versions: number;
       value: string;
       version_num: number;
@@ -202,6 +203,7 @@
       if (item.value !== formModel.value.value) {
         acc.push({
           name: item.name,
+          related_distributions: item.related_distributions,
           related_versions: item.related_versions,
           value: item.value,
           version_num: item.version_num,
@@ -209,6 +211,7 @@
       } else {
         acc.push({
           name: formModel.value.name,
+          related_distributions: item.related_distributions,
           related_versions: item.related_versions,
           value: formModel.value.value,
           version_num: formModel.value.version_num,
@@ -219,6 +222,7 @@
     if (!props.isEdit) {
       items.push({
         name: formModel.value.name,
+        related_distributions: 0,
         related_versions: 0,
         value: formModel.value.value,
         version_num: formModel.value.version_num,
