@@ -169,6 +169,7 @@
   );
 
   const handleAddVersionSuccess = () => {
+    fetchVersionSeriesList();
     emits('refreshReleaseList');
   };
 
