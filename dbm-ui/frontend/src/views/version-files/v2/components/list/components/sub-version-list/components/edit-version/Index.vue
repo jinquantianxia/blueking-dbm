@@ -58,7 +58,7 @@
             </span>
           </BkFormItem>
           <BkFormItem
-            class="version-item"
+            class="version-item version-name-item"
             :class="{ 'is-hide-tip': !formModel.name }"
             :label="t('版本名')"
             property="name"
@@ -513,6 +513,10 @@
           .version-item {
             flex: 1;
             position: relative;
+
+            &.version-name-item {
+              min-width: 300px;
+            }
 
             .reset-default-btn {
               position: absolute;
