@@ -42,13 +42,16 @@ const redirectLogin = (loginUrl: string) => {
 const handlePermission = (error: RequestError) => {
   const { emit } = useEventBus();
 
+  console.log('error = ', error.response.config);
   const requestPayload = error.response.config.payload;
 
   const iamResult = new IamApplyDataModel(error.response.data.data || {});
+  console.log('requestPayload.permission = ', requestPayload.permission);
   if (requestPayload.permission === 'page') {
     // 配合 jb-router-view（@components/audit-router-view）全局展示没权限提示
     emit('permission-page', iamResult);
   } else if (requestPayload.permission === 'catch') {
+    console.log('permission-catch = ', iamResult);
     // 配合 apply-section （@components/apply-permission/catch）使用，局部展示没权限提示
     emit('permission-catch', iamResult);
   } else {

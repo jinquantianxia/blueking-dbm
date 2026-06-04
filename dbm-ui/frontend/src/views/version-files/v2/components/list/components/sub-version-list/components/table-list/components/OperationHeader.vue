@@ -60,7 +60,8 @@
           <AuthTemplate
             action-id="package_manage"
             :permission="permission"
-            :resource="dbType">
+            :resource="dbType"
+            @click.stop>
             <div
               v-bk-tooltips="{
                 content: t('该版本系列下存在 n 个版本，请删除后再操作', { n: dbVersionListCount }),
@@ -68,8 +69,7 @@
                 disabled: dbVersionListCount === 0,
               }"
               class="operate-item"
-              :class="{ 'is-disabled': dbVersionListCount > 0 }"
-              @click.stop>
+              :class="{ 'is-disabled': dbVersionListCount > 0 }">
               {{ t('删除系列') }}
             </div>
           </AuthTemplate>

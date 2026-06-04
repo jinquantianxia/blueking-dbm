@@ -157,16 +157,6 @@
   };
 
   watch(
-    () => [props.dbType, props.pkgType],
-    () => {
-      versionSeriesList.value = [];
-    },
-    {
-      immediate: true,
-    },
-  );
-
-  watch(
     () => props.releaseVersion,
     () => {
       if (props.releaseVersion) {
@@ -179,6 +169,7 @@
   );
 
   const handleAddVersionSuccess = () => {
+    fetchVersionSeriesList();
     emits('refreshReleaseList');
   };
 

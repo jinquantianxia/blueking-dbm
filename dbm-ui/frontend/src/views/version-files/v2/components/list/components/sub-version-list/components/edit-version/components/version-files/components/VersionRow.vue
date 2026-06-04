@@ -97,11 +97,11 @@
     <td>
       <DbIcon
         v-bk-tooltips="{
-          content: !ableToDelete ? t('至少保留1个版本文件') : t('该版本已被应用，无法删除'),
-          disabled: ableToDelete && !isApplied,
+          content: t('该版本已被应用，无法删除'),
+          disabled: !isApplied,
         }"
         class="version-row-delete-icon"
-        :class="{ 'is-disabled': !ableToDelete || isApplied }"
+        :class="{ 'is-disabled': isApplied }"
         type="delete"
         @click="handleDelete" />
     </td>
@@ -115,7 +115,6 @@
   import { listSupportSystems } from '@services/source/package';
 
   interface Props {
-    ableToDelete?: boolean;
     data: {
       id?: number;
       md5: string;
@@ -144,7 +143,6 @@
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    ableToDelete: true,
     isApplied: false,
   });
   const emits = defineEmits<Emits>();
@@ -207,6 +205,8 @@
     () => [props.selectedSystems, props.selectedVersions],
     () => {
       nextTick(() => {
+        console.log('props.selectedSystems = ', props.selectedSystems);
+        console.log('props.selectedVersions = ', props.selectedVersions);
         selectedAllSystems.value = props.selectedSystems;
         selectedAllVersions.value = props.selectedVersions;
         if (localData.value.permit_os.length > 0) {
@@ -274,7 +274,7 @@
   };
 
   const handleDelete = () => {
-    if (props.ableToDelete && !props.isApplied) {
+    if (!props.isApplied) {
       emits('delete');
     }
   };
