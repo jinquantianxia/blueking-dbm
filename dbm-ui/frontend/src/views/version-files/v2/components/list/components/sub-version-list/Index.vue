@@ -50,6 +50,7 @@
         ref="versionsListRef"
         class="versions-list-main">
         <TableList
+          :key="renderKey"
           ref="subVersionRefs"
           :db-type="dbType"
           :permission="commonPermission"
@@ -140,6 +141,7 @@
   const currentVersionSeriesId = ref(0);
   const dbVersionListCount = ref(0);
   const currentDbVersion = ref<DbVersionModel>();
+  const renderKey = ref(0);
 
   const isPureMysql = computed(() => props.dbType === 'mysql' && props.pkgType === 'mysql');
   const commonPermission = computed(
@@ -148,6 +150,10 @@
 
   const { data: versionSeriesList, run: runGetVersionSeriesList } = useRequest(getVersionSeriesList, {
     manual: true,
+    onSuccess() {
+      renderKey.value++;
+      console.log('renderKey = ', renderKey.value);
+    },
   });
 
   const fetchVersionSeriesList = () => {
@@ -155,16 +161,6 @@
       distribution: props.releaseVersion!.id,
     });
   };
-
-  watch(
-    () => [props.dbType, props.pkgType],
-    () => {
-      versionSeriesList.value = [];
-    },
-    {
-      immediate: true,
-    },
-  );
 
   watch(
     () => props.releaseVersion,

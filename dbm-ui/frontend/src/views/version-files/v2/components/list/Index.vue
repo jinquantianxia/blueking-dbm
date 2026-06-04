@@ -5,6 +5,7 @@
       :key="renderKey"
       ref="releaseVersionListRef"
       :db-type="dbType"
+      :has-package-manage-permission="hasPackageManagePermission"
       :pkg-label-map="pkgLabelMap"
       :pkg-type="pkgType"
       @choose-release="handleChooseRelease"
@@ -60,10 +61,15 @@
       if (!isPureMysql.value) {
         const pkgList = props.tabs.find((item) => item.name === props.dbType)?.children.map((item) => item.name);
         if (pkgList?.includes(props.pkgType)) {
-          runGetReleaseList({
-            db_type: props.dbType,
-            pkg_type: props.pkgType,
-          });
+          runGetReleaseList(
+            {
+              db_type: props.dbType,
+              pkg_type: props.pkgType,
+            },
+            {
+              permission: 'catch',
+            },
+          );
         }
       }
       setTimeout(() => {

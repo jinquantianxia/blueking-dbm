@@ -5276,7 +5276,7 @@
   "当前推荐版本，点击取消": "Current recommended version; click to unset",
   "一个版本可能含多个介质文件（不同 OS 适配），列表默认展示首文件，点击 +N 可展开全部": "A version may include multiple media files (for different OSes). The list shows the first file by default; click +N to expand all.",
   "已存在同名文件「x」": "A file named 「{x}」 already exists.",
-  "该发行版已存在": "This release edition already exists",
+  "该发行版名已存在": "This release edition already exists",
   "该版本号已存在": "This version number already exists",
   "该版本名已存在": "This version name already exists",
   "OS版本": "OS Version",
@@ -5302,5 +5302,10 @@
   "该标识已存在": "This identifier already exists",
   "该包类型尚无版本，可调整位数；一旦添加版本即冻结": "This package type has no versions. The number of digits can be adjusted; once a version is added, it is frozen.",
   "该包类型下存在 n 个发行版，请删除后再操作": "There are {n} distributions under this package type. Delete them before continuing.",
+  "请至少添加 1 个版本文件": "Please add at least 1 version file",
+  "下载版本文件": "Download version file",
+  "系列": "Series",
+  "格式不正确，请勿使用空格或特殊符号": "Format incorrect. Do not use spaces or special symbols",
+  "请勿使用中文": "Do not use Chinese",
   "这行勿动！新增翻译请在上一行添加！": ""
 }

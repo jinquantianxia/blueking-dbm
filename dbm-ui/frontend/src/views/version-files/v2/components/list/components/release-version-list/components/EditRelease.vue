@@ -16,15 +16,25 @@
         class="mt-14"
         form-type="vertical"
         :model="formModel"
-        :rules="formRules">
+        :rules="formRules"
+        @validate="handleFormValidate">
         <BkFormItem
+          :class="{ 'is-hide-tip': !formModel.name }"
           :label="t('发行版名称')"
           property="name"
           required>
           <BkInput
             v-model="formModel.name"
+            clearable
             :disabled="!!data?.version_series_count"
-            :placeholder="t('请输入发行版名称，如：TXSQL，以英文字母开头，且只能包含英文字母、数字、连字符-')" />
+            :maxlength="50"
+            :placeholder="t('请输入xx', [t('发行版名称')])"
+            show-word-limit />
+          <span
+            v-if="!hideNameTip"
+            class="item-tip">
+            {{ t('仅支持字母、数字、连字符、下划线、点号，创建后不可修改') }}
+          </span>
         </BkFormItem>
         <BkFormItem
           property="engine"
@@ -103,16 +113,22 @@
       value: string;
     }[]
   >([]);
+  const hideNameTip = ref(false);
 
   const formRules = computed(() => ({
     name: [
       {
-        message: t('以英文字母开头，且只能包含英文字母、数字、连字符-'),
+        message: t('请勿使用中文'),
+        trigger: 'blur',
+        validator: (value: string) => !/[\u4e00-\u9fa5]/.test(value),
+      },
+      {
+        message: t('格式不正确，请勿使用空格或特殊符号'),
         trigger: 'blur',
         validator: (value: string) => /^[a-zA-Z][a-zA-Z0-9-]*$/.test(value),
       },
       {
-        message: t('该发行版已存在'),
+        message: t('该发行版名已存在'),
         trigger: 'blur',
         validator: (value: string) => !props.existedNameList.includes(value.toLocaleLowerCase()),
       },
@@ -180,6 +196,12 @@
     },
   );
 
+  const handleFormValidate = (property: string, result: boolean) => {
+    if (property === 'name') {
+      hideNameTip.value = !result && !!formModel.value.name;
+    }
+  };
+
   const handleSubmit = () => {
     formRef.value.validate().then(() => {
       const commonParams = {
@@ -228,6 +250,17 @@
       .engine-tip {
         position: absolute;
         left: 64px;
+        color: #979ba5;
+      }
+
+      .is-hide-tip {
+        .bk-form-error {
+          display: none;
+        }
+      }
+
+      .item-tip {
+        font-size: 12px;
         color: #979ba5;
       }
     }

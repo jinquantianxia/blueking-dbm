@@ -12,11 +12,11 @@
 -->
 
 <template>
-  <ApplyPermissionCatch>
-    <div class="version-files-page">
-      <DbTab
-        v-model="dbTypeActive"
-        :exclude="[DBTypes.TENDBCLUSTER]" />
+  <div class="version-files-page">
+    <DbTab
+      v-model="dbTypeActive"
+      :exclude="[DBTypes.TENDBCLUSTER]" />
+    <ApplyPermissionCatch>
       <div
         v-if="renderPkgTypeList.length > 0"
         class="veriosn-content-main"
@@ -25,7 +25,7 @@
           v-bk-loading="{ loading: pkgTypeListLoading }"
           class="pkg-tab-main-container">
           <BkTab
-            :key="pkgActive"
+            :key="dbTypeActive"
             v-model:active="pkgActive"
             class="pkg-tab-main"
             type="card-tab">
@@ -70,15 +70,15 @@
           {{ t('新建包类型') }}
         </AuthButton>
       </BkException>
-    </div>
-    <PkgTypeManage
-      ref="pkgTypeManageRef"
-      v-model:is-show="isShowPkgTypeManage"
-      :db-type="dbTypeActive"
-      :db-type-label="activeTabInfo.label"
-      :pkg-type-list="pkgTypeList || []"
-      @success="handleGetPkgTypeList" />
-  </ApplyPermissionCatch>
+    </ApplyPermissionCatch>
+  </div>
+  <PkgTypeManage
+    ref="pkgTypeManageRef"
+    v-model:is-show="isShowPkgTypeManage"
+    :db-type="dbTypeActive"
+    :db-type-label="activeTabInfo.label"
+    :pkg-type-list="pkgTypeList || []"
+    @success="handleGetPkgTypeList" />
 </template>
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
@@ -137,15 +137,38 @@
   const hasPackageManagePermission = ref(false);
   const tabs = ref<TabItem[]>([
     {
-      children: [],
+      children: [
+        {
+          label: 'MySQL',
+          name: DBTypes.MYSQL,
+        },
+      ],
       controller: {
         moduleId: 'mysql',
       },
       label: 'MySQL',
       name: DBTypes.MYSQL,
     },
+    // {
+    //   children: [
+    //     {
+    //       label: 'TenDBCluster',
+    //       name: DBTypes.TENDBCLUSTER,
+    //     },
+    //   ],
+    //   controller: {
+    //     moduleId: 'mysql',
+    //   },
+    //   label: 'TenDBCluster',
+    //   name: DBTypes.TENDBCLUSTER,
+    // },
     {
-      children: [],
+      children: [
+        {
+          label: 'Redis',
+          name: DBTypes.REDIS,
+        },
+      ],
       controller: {
         moduleId: 'redis',
       },
@@ -153,7 +176,12 @@
       name: DBTypes.REDIS,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'ES',
+          name: DBTypes.ES,
+        },
+      ],
       controller: {
         id: 'es',
         moduleId: 'bigdata',
@@ -162,7 +190,12 @@
       name: DBTypes.ES,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'Kafka',
+          name: DBTypes.KAFKA,
+        },
+      ],
       controller: {
         id: 'kafka',
         moduleId: 'bigdata',
@@ -171,7 +204,12 @@
       name: DBTypes.KAFKA,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'HDFS',
+          name: DBTypes.HDFS,
+        },
+      ],
       controller: {
         id: 'hdfs',
         moduleId: 'bigdata',
@@ -180,7 +218,12 @@
       name: DBTypes.HDFS,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'Plusar',
+          name: DBTypes.PULSAR,
+        },
+      ],
       controller: {
         id: 'pulsar',
         moduleId: 'bigdata',
@@ -189,7 +232,12 @@
       name: DBTypes.PULSAR,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'InfluxDB',
+          name: DBTypes.INFLUXDB,
+        },
+      ],
       controller: {
         id: 'influxdb',
         moduleId: 'bigdata',
@@ -198,7 +246,12 @@
       name: DBTypes.INFLUXDB,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'Riak',
+          name: DBTypes.RIAK,
+        },
+      ],
       controller: {
         id: 'riak',
         moduleId: 'bigdata',
@@ -207,7 +260,12 @@
       name: DBTypes.RIAK,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'MongoDB',
+          name: DBTypes.MONGODB,
+        },
+      ],
       controller: {
         moduleId: 'mongodb',
       },
@@ -215,7 +273,12 @@
       name: DBTypes.MONGODB,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'SQLServer',
+          name: DBTypes.SQLSERVER,
+        },
+      ],
       controller: {
         moduleId: 'sqlserver',
       },
@@ -223,7 +286,12 @@
       name: DBTypes.SQLSERVER,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'Doris',
+          name: DBTypes.DORIS,
+        },
+      ],
       controller: {
         id: 'doris',
         moduleId: 'bigdata',
@@ -232,7 +300,12 @@
       name: DBTypes.DORIS,
     },
     {
-      children: [],
+      children: [
+        {
+          label: 'Oracle',
+          name: DBTypes.ORACLE,
+        },
+      ],
       controller: {
         moduleId: 'oracle',
       },
@@ -312,15 +385,33 @@
   });
 
   let isFirstLoad = true;
-  let hasPackageViewPermission = false;
 
   const handleGetPkgTypeList = () => {
-    fetchPkgTypeList({
-      db_type: dbTypeActive.value,
-    });
+    fetchPkgTypeList(
+      {
+        db_type: dbTypeActive.value,
+      },
+      {
+        permission: 'catch',
+      },
+    );
   };
 
-  const checkPackageManagePermission = async () => {
+  const checkPackagePermission = async () => {
+    const hasPackageViewPermission = await simpleCheckAllowed(
+      {
+        action_id: 'package_view',
+        is_raise_exception: true,
+        resource_id: dbTypeActive.value,
+      },
+      {
+        permission: 'page',
+      },
+    );
+    if (!hasPackageViewPermission) {
+      return;
+    }
+
     hasPackageManagePermission.value = await simpleCheckAllowed({
       action_id: 'package_manage',
       resource_id: dbTypeActive.value,
@@ -350,12 +441,8 @@
     });
   });
 
-  watch(dbTypeActive, () => {
-    if (!hasPackageViewPermission) {
-      return;
-    }
-
-    checkPackageManagePermission();
+  watch(dbTypeActive, checkPackagePermission, {
+    immediate: true,
   });
 
   watch(pkgTypeList, () => {
@@ -376,32 +463,12 @@
     pkgActive.value = pkgTypeList.value[0]?.value || '';
   });
 
-  const checkPackagePermission = async () => {
-    hasPackageViewPermission = await simpleCheckAllowed(
-      {
-        action_id: 'package_view',
-        is_raise_exception: true,
-        resource_id: '',
-      },
-      {
-        permission: 'page',
-      },
-    );
-    if (!hasPackageViewPermission) {
-      return;
-    }
-
-    checkPackageManagePermission();
-  };
-
   const handleCreatePkgType = () => {
     isShowPkgTypeManage.value = true;
     nextTick(() => {
       pkgTypeManageRef.value?.createPkgType();
     });
   };
-
-  checkPackagePermission();
 
   onMounted(() => {
     const { dbType, pkgType } = route.query;

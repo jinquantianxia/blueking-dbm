@@ -66,8 +66,11 @@ export function getMysqlEngineList(params?: { limit?: number; offset?: number })
 /**
  * 发行版列表
  */
-export function getReleaseVersionList(params: { db_type: string; engine?: string; name?: string; pkg_type: string }) {
-  return http.get<ReleaseVersionModel[]>(`${path}/distribution/`, params, { cache: 3000 }).then((data) => {
+export function getReleaseVersionList(
+  params: { db_type: string; engine?: string; name?: string; pkg_type: string },
+  payload?: IRequestPayload,
+) {
+  return http.get<ReleaseVersionModel[]>(`${path}/distribution/`, params, payload).then((data) => {
     return data.map((item) => new ReleaseVersionModel(item));
   });
 }
@@ -230,7 +233,7 @@ export function deleteVersionSeries(params: { distribution: number; id: number }
 /**
  * 包类型列表
  */
-export function getPkgTypeList(params: { db_type: string }) {
+export function getPkgTypeList(params: { db_type: string }, payload?: IRequestPayload) {
   return http.get<
     {
       name: string;
@@ -239,7 +242,7 @@ export function getPkgTypeList(params: { db_type: string }) {
       value: string;
       version_num: number;
     }[]
-  >(`${path}/dbversion/list_pkg_types/`, params);
+  >(`${path}/dbversion/list_pkg_types/`, params, payload);
 }
 
 /**
