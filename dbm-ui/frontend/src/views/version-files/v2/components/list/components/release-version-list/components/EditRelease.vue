@@ -30,11 +30,11 @@
             :maxlength="50"
             :placeholder="t('请输入xx', [t('发行版名称')])"
             show-word-limit />
-          <span
+          <div
             v-if="!hideNameTip"
             class="item-tip">
             {{ t('仅支持字母、数字、连字符、下划线、点号，创建后不可修改') }}
-          </span>
+          </div>
         </BkFormItem>
         <BkFormItem
           property="engine"
@@ -260,6 +260,8 @@
       }
 
       .item-tip {
+        position: absolute;
+        top: 28px;
         font-size: 12px;
         color: #979ba5;
       }

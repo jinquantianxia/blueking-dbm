@@ -54,11 +54,11 @@
               show-word-limit
               @blur="handleResetDefaultVersionName"
               @input="handleValueChange" />
-            <span
+            <div
               v-if="!hideTipMap.full_version"
               class="item-tip">
               {{ fullVersionPlaceholder }}
-            </span>
+            </div>
           </BkFormItem>
           <BkFormItem
             class="version-item version-name-item"
@@ -81,11 +81,11 @@
               :placeholder="t('请输入xx', [t('版本名')])"
               show-word-limit
               @input="handleValueChange" />
-            <span
+            <div
               v-if="!hideTipMap.name"
               class="item-tip">
               {{ t('仅支持字母、数字、连字符、下划线、点号，可随时修改') }}
-            </span>
+            </div>
           </BkFormItem>
           <BkFormItem
             class="version-item"
@@ -127,9 +127,11 @@
           property="description">
           <BkInput
             v-model="formModel.description"
+            :maxlength="500"
             :placeholder="t('请输入子版本描述，如：“修复 XX 漏洞”“优化性能”')"
             :resize="false"
             :rows="5"
+            show-word-limit
             type="textarea"
             @input="handleValueChange" />
         </BkFormItem>
@@ -307,8 +309,7 @@
     ],
     full_version: [
       {
-        message: () =>
-          isFullVersionSixMax.value ? t('请输入6位点分数字，如 1.2.1.0.0.1') : t('请输入3位点分数字，如 1.2.1'),
+        message: t('格式不正确，须为 {n} 段点分数字', { n: isFullVersionSixMax.value ? 6 : 3 }),
         trigger: 'blur',
         validator: (value: string) =>
           isFullVersionSixMax.value ? /^(\d+\.){5}\d+$/.test(value) : /^(\d+\.){2}\d+$/.test(value),
@@ -498,6 +499,10 @@
       return;
     }
     formModel.value = initFormModel();
+    hideTipMap.value = {
+      full_version: false,
+      name: false,
+    };
   };
 </script>
 <style lang="less">
@@ -562,6 +567,8 @@
         }
 
         .item-tip {
+          position: absolute;
+          top: 28px;
           font-size: 12px;
           color: #979ba5;
         }

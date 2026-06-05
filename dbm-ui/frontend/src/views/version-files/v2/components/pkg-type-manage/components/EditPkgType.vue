@@ -8,35 +8,38 @@
     :width="480">
     <BkForm
       ref="formRef"
+      class="edit-pkg-type-form"
       form-type="vertical"
       :model="formModel"
       :rules="formRules"
       @validate="handleFormValidate">
       <BkFormItem
+        :class="{ 'is-hide-tip': !formModel.value }"
         :label="t('标识')"
         property="value"
         required>
         <BkInput
           v-model="formModel.value"
           :disabled="isEdit"
-          :placeholder="t('请输入标识')" />
+          :placeholder="t('请输入xx', [t('标识')])" />
         <div
-          v-if="showValueNormalTip"
+          v-if="!hideTipMap.value"
           class="edit-pkg-type-form-desc">
-          {{ t('字母 / 数字 / _ / -，创建后不可修改') }}
+          {{ t('仅支持字母、数字、连字符、下划线、点号，创建后不可改') }}
         </div>
       </BkFormItem>
       <BkFormItem
+        :class="{ 'is-hide-tip': !formModel.name }"
         :label="t('显示名')"
         property="name"
         required>
         <BkInput
           v-model="formModel.name"
-          :placeholder="t('请输入显示名')" />
+          :placeholder="t('请输入xx', [t('显示名')])" />
         <div
-          v-if="showNameNormalTip"
+          v-if="!hideTipMap.name"
           class="edit-pkg-type-form-desc">
-          {{ t('1~30 字符，UI 展示用，创建后可修改') }}
+          {{ t('支持中文、字母、数字，创建后可修改') }}
         </div>
       </BkFormItem>
       <BkFormItem
@@ -124,8 +127,10 @@
     value: '',
     version_num: 3,
   });
-  const showValueNormalTip = ref(true);
-  const showNameNormalTip = ref(true);
+  const hideTipMap = ref({
+    name: false,
+    value: false,
+  });
 
   const versionDigitOptions = [
     {
@@ -143,29 +148,24 @@
   const formRules = computed(() => ({
     name: [
       {
-        message: t('请输入显示名'),
+        message: t('格式不正确，请勿使用括号或特殊符号'),
         trigger: 'blur',
-        validator: (value: string) => !!value.trim(),
-      },
-      {
-        message: t('显示名长度为 1~30 字符'),
-        trigger: 'blur',
-        validator: (value: string) => value.trim().length >= 1 && value.trim().length <= 30,
+        validator: (value: string) => /^[^()[\]{}<>@!#$%^&*+=|\\/?:;"',.~`]+$/.test(value),
       },
     ],
     value: [
       {
-        message: t('请输入标识'),
+        message: t('请勿使用中文'),
         trigger: 'blur',
-        validator: (value: string) => !!value.trim(),
+        validator: (value: string) => !/[\u4e00-\u9fa5]/.test(value),
       },
       {
-        message: t('只允许字母 / 数字 / 下划线 / 中划线'),
+        message: t('格式不正确，请勿使用空格或特殊符号'),
         trigger: 'blur',
-        validator: (value: string) => /^[a-zA-Z0-9_-]+$/.test(value),
+        validator: (value: string) => /^[a-zA-Z0-9]+$/.test(value),
       },
       {
-        message: t('该标识已存在'),
+        message: t('该数据库类型下已存在同名标识'),
         trigger: 'blur',
         validator: (value: string) => {
           if (props.isEdit) {
@@ -239,27 +239,30 @@
   };
 
   const handleFormValidate = (property: string, result: boolean) => {
-    if (property === 'value') {
-      showValueNormalTip.value = result;
-      return;
-    }
-
-    if (property === 'name') {
-      showNameNormalTip.value = result;
-    }
+    hideTipMap.value[property as keyof typeof hideTipMap.value] =
+      !result && !!formModel.value[property as keyof typeof formModel.value];
   };
 </script>
 
 <style lang="less">
   .edit-pkg-type-dialog {
     .edit-pkg-type-form-desc {
-      margin-top: 4px;
+      position: absolute;
+      top: 34px;
       font-size: 12px;
       line-height: 20px;
       color: #979ba5;
 
       &.is-last-tip {
         margin-top: -6px;
+      }
+    }
+
+    .edit-pkg-type-form {
+      .is-hide-tip {
+        .bk-form-error {
+          display: none;
+        }
       }
     }
   }
