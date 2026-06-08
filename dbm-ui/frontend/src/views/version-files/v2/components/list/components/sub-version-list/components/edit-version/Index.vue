@@ -55,7 +55,7 @@
               @blur="handleResetDefaultVersionName"
               @input="handleValueChange" />
             <div
-              v-if="!hideTipMap.full_version"
+              v-if="!hideTipMap.full_version && !isEdit"
               class="item-tip">
               {{ fullVersionPlaceholder }}
             </div>
@@ -99,6 +99,7 @@
           </BkFormItem>
         </div>
         <BkFormItem
+          class="mt-16"
           :label="t('版本文件')"
           property="files"
           :required="!isEdit">

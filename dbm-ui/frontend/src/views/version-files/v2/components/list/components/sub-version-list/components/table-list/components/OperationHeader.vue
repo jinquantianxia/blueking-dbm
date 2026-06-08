@@ -58,20 +58,18 @@
           width="280"
           @confirm="handleDeleteVersionSeries">
           <AuthTemplate
+            v-bk-tooltips="{
+              content: t('该版本系列下存在 n 个版本，请删除后再操作', { n: dbVersionListCount }),
+              placement: 'right',
+              disabled: dbVersionListCount === 0,
+            }"
             action-id="package_manage"
+            class="operate-item"
+            :class="{ 'is-disabled': dbVersionListCount > 0 }"
             :permission="permission"
             :resource="dbType"
             @click.stop>
-            <div
-              v-bk-tooltips="{
-                content: t('该版本系列下存在 n 个版本，请删除后再操作', { n: dbVersionListCount }),
-                placement: 'right',
-                disabled: dbVersionListCount === 0,
-              }"
-              class="operate-item"
-              :class="{ 'is-disabled': dbVersionListCount > 0 }">
-              {{ t('删除系列') }}
-            </div>
+            {{ t('删除系列') }}
           </AuthTemplate>
         </BkPopConfirm>
       </div>

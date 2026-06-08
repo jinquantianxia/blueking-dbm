@@ -113,15 +113,10 @@
   });
 
   const fetchReleaseList = () => {
-    runGetReleaseVersionList(
-      {
-        db_type: props.dbType,
-        pkg_type: props.pkgType,
-      },
-      {
-        permission: 'catch',
-      },
-    );
+    runGetReleaseVersionList({
+      db_type: props.dbType,
+      pkg_type: props.pkgType,
+    });
   };
 
   watch(

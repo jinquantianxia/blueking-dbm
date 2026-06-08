@@ -16,68 +16,117 @@
     <DbTab
       v-model="dbTypeActive"
       :exclude="[DBTypes.TENDBCLUSTER]" />
-    <ApplyPermissionCatch>
+    <div
+      v-if="renderPkgTypeList.length > 0"
+      class="veriosn-content-main">
       <div
-        v-if="renderPkgTypeList.length > 0"
-        class="veriosn-content-main"
-        :class="{ 'has-package-manage-permission': hasPackageManagePermission }">
-        <div
-          v-bk-loading="{ loading: pkgTypeListLoading }"
-          class="pkg-tab-main-container">
-          <BkTab
-            :key="dbTypeActive"
-            v-model:active="pkgActive"
-            class="pkg-tab-main"
-            type="card-tab">
-            <BkTabPanel
-              v-for="tab of renderPkgTypeList"
-              :key="tab.name"
-              :label="tab.label"
-              :name="tab.name" />
-          </BkTab>
-          <BkButton
-            v-if="hasPackageManagePermission"
-            class="manage-pkg-type-button"
-            @click="isShowPkgTypeManage = true">
-            <DbIcon type="baoguanli" />
-            <span class="ml-4">{{ t('管理包类型') }}</span>
-          </BkButton>
-        </div>
-        <div class="content-main">
-          <List
-            :db-type="dbTypeActive"
-            :has-package-manage-permission="hasPackageManagePermission"
-            :pkg-label-map="pkgLabelMap"
-            :pkg-type="pkgActive"
-            :tabs="renderTabs" />
-        </div>
+        v-bk-loading="{ loading: pkgTypeListLoading }"
+        class="pkg-tab-main-container">
+        <BkTab
+          :key="dbTypeActive"
+          v-model:active="pkgActive"
+          class="pkg-tab-main"
+          :class="{ 'pkg-tab-main-scroll': isPkgTabScroll }"
+          type="card-tab">
+          <template #add>
+            <AuthTemplate
+              action-id="package_manage"
+              class="manage-pkg-type-main"
+              :permission="hasPackageManagePermission"
+              :resource="dbTypeActive"
+              @click="handleCreatePkgType">
+              <div class="manage-pkg-type-icon">
+                <DbIcon type="add" />
+              </div>
+            </AuthTemplate>
+          </template>
+          <BkTabPanel
+            v-for="tab of renderPkgTypeList"
+            :key="tab.name"
+            :label="tab.label"
+            :name="tab.name">
+            <template #label>
+              <div class="tab-label-main">
+                <span>{{ tab.label }}</span>
+                <BkDropdown trigger="click">
+                  <div class="tab-label-more">
+                    <DbIcon type="more" />
+                  </div>
+                  <template #content>
+                    <BkDropdownMenu>
+                      <BkDropdownItem>
+                        <BkButton
+                          text
+                          @click="() => handleEditPkgType(tab)">
+                          {{ t('编辑包配置') }}
+                        </BkButton>
+                      </BkDropdownItem>
+                      <BkPopConfirm
+                        :confirm-config="{
+                          theme: 'danger',
+                        }"
+                        :confirm-text="t('删除')"
+                        :content="t('删除操作无法撤回，请谨慎操作！')"
+                        :popover-options="{
+                          placement: 'bottom-start',
+                        }"
+                        :title="t('确认删除该包类型？')"
+                        trigger="click"
+                        width="280"
+                        @confirm="() => handleConfirmDeletePkgType(tab)">
+                        <BkDropdownItem
+                          v-bk-tooltips="{
+                            content: t('该类型下存在版本文件，无法删除'),
+                            disabled: pkgTypeCanDeleteMap[tab.name],
+                            placement: 'right',
+                          }">
+                          <BkButton
+                            :disabled="!pkgTypeCanDeleteMap[tab.name]"
+                            text>
+                            {{ t('删除包类型') }}
+                          </BkButton>
+                        </BkDropdownItem>
+                      </BkPopConfirm>
+                    </BkDropdownMenu>
+                  </template>
+                </BkDropdown>
+              </div>
+            </template>
+          </BkTabPanel>
+        </BkTab>
       </div>
-      <BkException
-        v-else
-        class="pkg-type-empty-main"
-        type="empty">
-        <span>{{ t('该数据库类型下暂无包类型') }}</span>
-        <span class="ml-4 mr-4">,</span>
-        <span class="mr-4">{{ t('立即') }}</span>
-        <AuthButton
-          action-id="package_manage"
-          :permission="hasPackageManagePermission"
-          :resource="dbTypeActive"
-          size="small"
-          text
-          theme="primary"
-          @click="handleCreatePkgType">
-          {{ t('新建包类型') }}
-        </AuthButton>
-      </BkException>
-    </ApplyPermissionCatch>
+      <div class="content-main">
+        <List
+          :db-type="dbTypeActive"
+          :has-package-manage-permission="hasPackageManagePermission"
+          :pkg-label-map="pkgLabelMap"
+          :pkg-type="pkgActive"
+          :tabs="renderTabs" />
+      </div>
+    </div>
+    <BkException
+      v-else
+      class="pkg-type-empty-main"
+      type="empty">
+      <span>{{ t('该数据库类型下暂无包类型') }}</span>
+      <span class="ml-4 mr-4">,</span>
+      <span class="mr-4">{{ t('立即') }}</span>
+      <BkButton
+        size="small"
+        text
+        theme="primary"
+        @click="handleCreatePkgType">
+        {{ t('新建包类型') }}
+      </BkButton>
+    </BkException>
   </div>
-  <PkgTypeManage
-    ref="pkgTypeManageRef"
+  <EditPkgType
     v-model:is-show="isShowPkgTypeManage"
+    :data="currentPkgType"
     :db-type="dbTypeActive"
-    :db-type-label="activeTabInfo.label"
-    :pkg-type-list="pkgTypeList || []"
+    :existed-identifier-list="existedIdentifierList"
+    :is-edit="isEditPkgType"
+    :total-list="pkgTypeList || []"
     @success="handleGetPkgTypeList" />
 </template>
 <script setup lang="ts">
@@ -91,17 +140,18 @@
     FunctionKeys,
   } from '@services/model/function-controller/functionController';
   import { simpleCheckAllowed } from '@services/source/iam';
-  import { getPkgTypeList } from '@services/source/version';
+  import { getPkgTypeList, updatePkgType } from '@services/source/version';
 
   import { useFunController } from '@stores';
 
   import { DBTypes } from '@common/const';
 
-  import ApplyPermissionCatch from '@components/apply-permission/Catch.vue';
   import DbTab from '@components/db-tab/Index.vue';
 
+  import { messageSuccess } from '@utils';
+
+  import EditPkgType from './components/EditPkgType.vue';
   import List from './components/list/Index.vue';
-  import PkgTypeManage from './components/pkg-type-manage/Index.vue';
 
   export interface TabItem {
     children: {
@@ -130,11 +180,13 @@
     twemproxy: 'TwemproxyRedisInstance',
   };
 
-  const pkgTypeManageRef = ref<InstanceType<typeof PkgTypeManage>>();
   const pkgActive = ref('');
   const dbTypeActive = ref<DBTypes>(DBTypes.MYSQL);
   const isShowPkgTypeManage = ref(false);
   const hasPackageManagePermission = ref(false);
+  const isEditPkgType = ref(false);
+  const currentPkgType = ref<PkgTypeItem>();
+  const isPkgTabScroll = ref(false);
   const tabs = ref<TabItem[]>([
     {
       children: [
@@ -314,6 +366,8 @@
     },
   ]);
 
+  const existedIdentifierList = computed(() => pkgTypeList.value?.map((item) => item.value.toLocaleLowerCase()) || []);
+
   const pkgLabelMap = computed(() =>
     tabs.value.reduce<Record<string, string>>((dataMap, item) => {
       item.children.forEach((child) => {
@@ -365,6 +419,15 @@
   });
 
   const renderPkgTypeList = computed(() => activeTabInfo.value?.children || []);
+  const pkgTypeCanDeleteMap = computed(
+    () =>
+      pkgTypeList.value?.reduce<Record<string, PkgTypeItem>>((acc, item) => {
+        Object.assign(acc, {
+          [item.value]: item.can_delete,
+        });
+        return acc;
+      }, {}) || {},
+  );
 
   const {
     data: pkgTypeList,
@@ -381,20 +444,43 @@
           name: item.value,
         }));
       }
+      setTimeout(() => {
+        checkPkgTabScroll();
+      }, 1000);
+    },
+  });
+
+  const { run: runDeletePkgType } = useRequest(updatePkgType, {
+    manual: true,
+    onSuccess() {
+      messageSuccess(t('操作成功'));
+      handleGetPkgTypeList();
     },
   });
 
   let isFirstLoad = true;
 
+  const handleConfirmDeletePkgType = (tab: { label: string; name: string }) => {
+    if (!pkgTypeList.value?.length) {
+      return;
+    }
+
+    runDeletePkgType({
+      db_type: dbTypeActive.value,
+      items: pkgTypeList.value.filter((item) => item.value !== tab.name),
+    });
+  };
+
+  const handleEditPkgType = (tab: { label: string; name: string }) => {
+    isEditPkgType.value = true;
+    isShowPkgTypeManage.value = true;
+    currentPkgType.value = pkgTypeList.value?.find((item) => item.value === tab.name);
+  };
+
   const handleGetPkgTypeList = () => {
-    fetchPkgTypeList(
-      {
-        db_type: dbTypeActive.value,
-      },
-      {
-        permission: 'catch',
-      },
-    );
+    fetchPkgTypeList({
+      db_type: dbTypeActive.value,
+    });
   };
 
   const checkPackagePermission = async () => {
@@ -446,6 +532,10 @@
   });
 
   watch(pkgTypeList, () => {
+    nextTick(() => {
+      checkPkgTabScroll();
+    });
+
     if (!pkgTypeList.value?.length) {
       return;
     }
@@ -464,10 +554,16 @@
   });
 
   const handleCreatePkgType = () => {
+    isEditPkgType.value = false;
+    currentPkgType.value = undefined;
     isShowPkgTypeManage.value = true;
-    nextTick(() => {
-      pkgTypeManageRef.value?.createPkgType();
-    });
+  };
+
+  const checkPkgTabScroll = () => {
+    const tabListDom = document.querySelector('.tab-header-auto');
+    const scrollWidth = tabListDom?.scrollWidth || 0;
+    const clientWidth = tabListDom?.clientWidth || 0;
+    isPkgTabScroll.value = scrollWidth > clientWidth;
   };
 
   onMounted(() => {
@@ -480,6 +576,12 @@
         pkgActive.value = pkgType as string;
       });
     }
+
+    window.addEventListener('resize', checkPkgTabScroll);
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', checkPkgTabScroll);
   });
 </script>
 <style lang="less">
@@ -498,27 +600,84 @@
       .pkg-tab-main-container {
         position: relative;
         height: 42px;
-      }
 
-      &.has-package-manage-permission {
-        .pkg-tab-main {
-          .bk-tab-header-nav {
-            max-width: calc(100% - 140px);
+        .bk-tab-header-operation {
+          display: flex;
+          width: 42px;
+          height: 42px;
+          background: #f0f1f5;
+          border-radius: 0 4px 0 0;
+          justify-content: center;
+          align-items: center;
+
+          .bk-tab-header-item {
+            padding: 0;
+
+            &::after {
+              display: none;
+            }
           }
         }
       }
 
       .pkg-tab-main {
+        &.pkg-tab-main-scroll {
+          .bk-tab-header-operation {
+            box-shadow: -2px 0 4px 0 #0000001a;
+          }
+        }
+
         .bk-tab-content {
           display: none;
         }
+
+        .bk-tab-header--active {
+          .tab-label-more {
+            display: flex !important;
+          }
+        }
+
+        .tab-label-main {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .tab-label-more {
+            justify-content: center;
+            align-items: center;
+            display: none;
+            width: 26px;
+            height: 26px;
+            margin-left: 8px;
+            border-radius: 2px;
+
+            &:hover {
+              background: #e1ecff;
+            }
+          }
+        }
       }
 
-      .manage-pkg-type-button {
-        position: absolute;
-        top: 7px;
-        right: 6px;
-        width: 120px;
+      .manage-pkg-type-main {
+        display: flex;
+        width: 42px;
+        height: 42px;
+        justify-content: center;
+        align-items: center;
+
+        .manage-pkg-type-icon {
+          display: flex;
+          width: 26px;
+          height: 26px;
+          color: #3a84ff;
+          border-radius: 2px;
+          justify-content: center;
+          align-items: center;
+
+          &:hover {
+            background: #e1ecff;
+          }
+        }
       }
 
       .content-main {

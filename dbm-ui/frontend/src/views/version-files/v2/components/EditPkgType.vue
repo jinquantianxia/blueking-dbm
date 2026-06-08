@@ -29,6 +29,7 @@
         </div>
       </BkFormItem>
       <BkFormItem
+        class="mt-32"
         :class="{ 'is-hide-tip': !formModel.name }"
         :label="t('显示名')"
         property="name"
@@ -39,10 +40,11 @@
         <div
           v-if="!hideTipMap.name"
           class="edit-pkg-type-form-desc">
-          {{ t('支持中文、字母、数字，创建后可修改') }}
+          {{ t('支持中文、字母、数字、连字符、下划线、点号，创建后可修改') }}
         </div>
       </BkFormItem>
       <BkFormItem
+        class="mt-32"
         :label="t('版本号位数')"
         property="version_num"
         required>
@@ -57,18 +59,14 @@
           </BkRadio>
         </BkRadioGroup>
         <div
-          v-if="isEdit"
+          v-if="isEdit && data?.related_versions && data.related_versions > 0"
           class="edit-pkg-type-form-desc is-last-tip">
-          {{
-            data?.related_versions && data?.related_versions > 0
-              ? t('已有 n 个版本，位数不可修改', { n: data?.related_versions || 0 })
-              : t('该包类型尚无版本，可调整位数；一旦添加版本即冻结')
-          }}
+          {{ t('已有 n 个版本，位数不可修改', { n: data?.related_versions || 0 }) }}
         </div>
         <div
-          v-else
+          v-if="!isEdit"
           class="edit-pkg-type-form-desc is-last-tip">
-          {{ t('创建后不可修改，填错只能删除该包类型后重建') }}
+          {{ t('添加版本后将锁定位数，清空版本后可重新选择') }}
         </div>
       </BkFormItem>
     </BkForm>
@@ -150,7 +148,7 @@
       {
         message: t('格式不正确，请勿使用括号或特殊符号'),
         trigger: 'blur',
-        validator: (value: string) => /^[^()[\]{}<>@!#$%^&*+=|\\/?:;"',.~`]+$/.test(value),
+        validator: (value: string) => /^[\u4e00-\u9fff\u3400-\u4dbf0-9A-Za-z._-\s]+$/.test(value),
       },
     ],
     value: [
@@ -162,7 +160,7 @@
       {
         message: t('格式不正确，请勿使用空格或特殊符号'),
         trigger: 'blur',
-        validator: (value: string) => /^[a-zA-Z0-9]+$/.test(value),
+        validator: (value: string) => /^[A-Za-z0-9._-]+$/.test(value),
       },
       {
         message: t('该数据库类型下已存在同名标识'),

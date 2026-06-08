@@ -236,6 +236,7 @@ export function deleteVersionSeries(params: { distribution: number; id: number }
 export function getPkgTypeList(params: { db_type: string }, payload?: IRequestPayload) {
   return http.get<
     {
+      can_delete: boolean;
       name: string;
       related_distributions: number;
       related_versions: number;

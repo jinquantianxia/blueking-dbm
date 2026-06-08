@@ -9,7 +9,6 @@
         <BkInput
           ref="editInputRef"
           v-model="newVersionName"
-          v-bk-tooltips="t('同一版本系列（如 5.7.20）代表核心功能兼容，支持原地升级')"
           class="edit-input"
           :placeholder="t('请输入xx', [t('系列名')])"
           @click.stop

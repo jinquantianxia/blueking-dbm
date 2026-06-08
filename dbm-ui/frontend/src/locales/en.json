@@ -5177,7 +5177,6 @@
   "适用的版本文件": "Applicable version files",
   "支持版本": "Supported versions",
   "请输入版本系列名称": "Please enter the version series name",
-  "同一版本系列（如 5.7.20）代表核心功能兼容，支持原地升级": "A version series (such as 5.7.20) represents core function compatibility and supports original upgrade",
   "新增系列": "New Series",
   "点击上传文件": "Click to upload file",
   "确认删除该版本？": "Confirm to delete this version?",
@@ -5310,5 +5309,8 @@
   "仅支持字母、数字、连字符、下划线、点号，可随时修改": "Only letters, numbers, hyphens, underscores, and dots are allowed. Can be modified at any time",
   "格式不正确，请勿使用括号或特殊符号": "Format incorrect. Do not use parentheses or special symbols",
   "3 段点分数字，如 5.0.14": "3 segments of dot-separated numbers, such as 5.0.14",
+  "支持中文、字母、数字、连字符、下划线、点号，创建后可修改": "Supports Chinese, letters, numbers, hyphens, underscores, and dots. Can be modified after creation.",
+  "添加版本后将锁定位数，清空版本后可重新选择": "After adding a version, the number of digits will be locked. The version can be selected again after clearing the version.",
+  "确认删除该包类型？": "Confirm to delete this package type?",
   "这行勿动！新增翻译请在上一行添加！": ""
 }

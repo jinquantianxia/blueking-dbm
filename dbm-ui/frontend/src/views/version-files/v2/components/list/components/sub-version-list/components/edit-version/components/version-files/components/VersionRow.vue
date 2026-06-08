@@ -1,10 +1,17 @@
 <template>
   <tr>
     <td>
-      <div
-        v-overflow-tips
-        class="text-overflow">
-        {{ data.name }}
+      <div class="version-file-name-container">
+        <div
+          v-overflow-tips
+          class="text-overflow">
+          {{ data.name }}
+        </div>
+        <div
+          v-overflow-tips
+          class="version-file-md5 text-overflow">
+          {{ data.md5 }}
+        </div>
       </div>
     </td>
     <td>
@@ -205,8 +212,6 @@
     () => [props.selectedSystems, props.selectedVersions],
     () => {
       nextTick(() => {
-        console.log('props.selectedSystems = ', props.selectedSystems);
-        console.log('props.selectedVersions = ', props.selectedVersions);
         selectedAllSystems.value = props.selectedSystems;
         selectedAllVersions.value = props.selectedVersions;
         if (localData.value.permit_os.length > 0) {
@@ -417,5 +422,19 @@
 
   .version-files-version-row-select {
     z-index: 99999;
+  }
+
+  .version-file-name-container {
+    width: 100%;
+    overflow: hidden;
+
+    .version-file-md5 {
+      height: 12px;
+      margin-top: -4px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      line-height: 12px;
+      color: #c4c6cc;
+    }
   }
 </style>
