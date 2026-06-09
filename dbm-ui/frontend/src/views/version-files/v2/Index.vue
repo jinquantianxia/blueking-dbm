@@ -55,11 +55,14 @@
                   <template #content>
                     <BkDropdownMenu>
                       <BkDropdownItem>
-                        <BkButton
+                        <AuthButton
+                          action-id="package_manage"
+                          :permission="hasPackageManagePermission"
+                          :resource="dbTypeActive"
                           text
                           @click="() => handleEditPkgType(tab)">
                           {{ t('编辑包类型') }}
-                        </BkButton>
+                        </AuthButton>
                       </BkDropdownItem>
                       <BkPopConfirm
                         :confirm-config="{
@@ -82,11 +85,14 @@
                             disabled: pkgTypeItemMap[tab.name].can_delete,
                             placement: 'right',
                           }">
-                          <BkButton
+                          <AuthButton
+                            action-id="package_manage"
                             :disabled="!pkgTypeItemMap[tab.name].can_delete"
+                            :permission="hasPackageManagePermission"
+                            :resource="dbTypeActive"
                             text>
                             {{ t('删除包类型') }}
-                          </BkButton>
+                          </AuthButton>
                         </BkDropdownItem>
                       </BkPopConfirm>
                     </BkDropdownMenu>
