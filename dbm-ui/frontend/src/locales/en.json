@@ -5312,5 +5312,6 @@
   "支持中文、字母、数字、连字符、下划线、点号，创建后可修改": "Supports Chinese, letters, numbers, hyphens, underscores, and dots. Can be modified after creation.",
   "添加版本后将锁定位数，清空版本后可重新选择": "After adding a version, the number of digits will be locked. The version can be selected again after clearing the version.",
   "确认删除该包类型？": "Confirm to delete this package type?",
+  "该包类型存在 n 个版本，请清理后再操作": "There are {n} versions under this package type. Please clean up before operating.",
   "这行勿动！新增翻译请在上一行添加！": ""
 }

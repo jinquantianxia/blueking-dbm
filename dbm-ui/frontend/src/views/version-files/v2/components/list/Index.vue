@@ -38,7 +38,10 @@
     tabs: TabItem[];
   }
 
+  type Emits = (e: 'refreshPkgTypeList') => void;
+
   const props = defineProps<Props>();
+  const emits = defineEmits<Emits>();
 
   const releaseVersionListRef = ref<InstanceType<typeof ReleaseVersionList>>();
   const subVersionListRef = ref<InstanceType<typeof SubVersionList>>();
@@ -87,6 +90,7 @@
 
   const handleRefreshReleaseList = () => {
     releaseVersionListRef.value?.refresh();
+    emits('refreshPkgTypeList');
   };
 </script>
 <style lang="less">

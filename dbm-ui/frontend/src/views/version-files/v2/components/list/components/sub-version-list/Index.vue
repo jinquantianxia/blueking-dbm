@@ -238,6 +238,7 @@
     const index = versionSeriesList.value!.findIndex((item) => item.id === versionSeriesId);
     if (index !== -1) {
       subVersionRefs.value!.refresh();
+      emits('refreshReleaseList');
     } else {
       emits('refreshReleaseList');
       fetchVersionSeriesList();

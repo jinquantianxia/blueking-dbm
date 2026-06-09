@@ -58,7 +58,7 @@
                         <BkButton
                           text
                           @click="() => handleEditPkgType(tab)">
-                          {{ t('编辑包配置') }}
+                          {{ t('编辑包类型') }}
                         </BkButton>
                       </BkDropdownItem>
                       <BkPopConfirm
@@ -76,12 +76,14 @@
                         @confirm="() => handleConfirmDeletePkgType(tab)">
                         <BkDropdownItem
                           v-bk-tooltips="{
-                            content: t('该类型下存在版本文件，无法删除'),
-                            disabled: pkgTypeCanDeleteMap[tab.name],
+                            content: t('该包类型存在 n 个版本，请清理后再操作', {
+                              n: pkgTypeItemMap[tab.name].related_versions,
+                            }),
+                            disabled: pkgTypeItemMap[tab.name].can_delete,
                             placement: 'right',
                           }">
                           <BkButton
-                            :disabled="!pkgTypeCanDeleteMap[tab.name]"
+                            :disabled="!pkgTypeItemMap[tab.name].can_delete"
                             text>
                             {{ t('删除包类型') }}
                           </BkButton>
@@ -101,7 +103,8 @@
           :has-package-manage-permission="hasPackageManagePermission"
           :pkg-label-map="pkgLabelMap"
           :pkg-type="pkgActive"
-          :tabs="renderTabs" />
+          :tabs="renderTabs"
+          @refresh-pkg-type-list="handleGetPkgTypeList" />
       </div>
     </div>
     <BkException
@@ -419,11 +422,11 @@
   });
 
   const renderPkgTypeList = computed(() => activeTabInfo.value?.children || []);
-  const pkgTypeCanDeleteMap = computed(
+  const pkgTypeItemMap = computed(
     () =>
       pkgTypeList.value?.reduce<Record<string, PkgTypeItem>>((acc, item) => {
         Object.assign(acc, {
-          [item.value]: item.can_delete,
+          [item.value]: item,
         });
         return acc;
       }, {}) || {},
@@ -572,9 +575,9 @@
       dbTypeActive.value = dbType as DBTypes;
     }
     if (pkgType) {
-      nextTick(() => {
+      setTimeout(() => {
         pkgActive.value = pkgType as string;
-      });
+      }, 500);
     }
 
     window.addEventListener('resize', checkPkgTabScroll);

@@ -429,11 +429,12 @@
     overflow: hidden;
 
     .version-file-md5 {
-      height: 12px;
+      width: 100%;
+      height: 18px;
       margin-top: -4px;
       margin-bottom: 10px;
       font-size: 12px;
-      line-height: 12px;
+      line-height: 18px;
       color: #c4c6cc;
     }
   }

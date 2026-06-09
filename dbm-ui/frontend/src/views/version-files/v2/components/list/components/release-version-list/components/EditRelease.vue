@@ -31,13 +31,13 @@
             :placeholder="t('请输入xx', [t('发行版名称')])"
             show-word-limit />
           <div
-            v-if="!hideNameTip"
+            v-if="!hideNameTip && !isEdit"
             class="item-tip">
             {{ t('仅支持字母、数字、连字符、下划线、点号，创建后不可修改') }}
           </div>
         </BkFormItem>
         <BkFormItem
-          class="mt-32"
+          :class="{ 'mt-32': !isEdit }"
           property="engine"
           required>
           <template #label>
@@ -121,17 +121,17 @@
       {
         message: t('请勿使用中文'),
         trigger: 'blur',
-        validator: (value: string) => !/[\u4e00-\u9fa5]/.test(value),
+        validator: (value: string) => props.isEdit || !/[\u4e00-\u9fa5]/.test(value),
       },
       {
         message: t('格式不正确，请勿使用空格或特殊符号'),
         trigger: 'blur',
-        validator: (value: string) => /^[A-Za-z0-9_.-]+$/.test(value),
+        validator: (value: string) => props.isEdit || /^[A-Za-z0-9_.-]+$/.test(value),
       },
       {
         message: t('该发行版名已存在'),
         trigger: 'blur',
-        validator: (value: string) => !props.existedNameList.includes(value.toLocaleLowerCase()),
+        validator: (value: string) => props.isEdit || !props.existedNameList.includes(value.toLocaleLowerCase()),
       },
     ],
   }));

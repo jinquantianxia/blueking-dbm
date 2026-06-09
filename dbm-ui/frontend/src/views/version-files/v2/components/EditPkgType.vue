@@ -23,14 +23,13 @@
           :disabled="isEdit"
           :placeholder="t('请输入xx', [t('标识')])" />
         <div
-          v-if="!hideTipMap.value"
+          v-if="!hideTipMap.value && !isEdit"
           class="edit-pkg-type-form-desc">
           {{ t('仅支持字母、数字、连字符、下划线、点号，创建后不可改') }}
         </div>
       </BkFormItem>
       <BkFormItem
-        class="mt-32"
-        :class="{ 'is-hide-tip': !formModel.name }"
+        :class="{ 'is-hide-tip': !formModel.name, 'mt-32': !isEdit }"
         :label="t('显示名')"
         property="name"
         required>
