@@ -26,23 +26,21 @@
         }">
         <AuthTemplate
           action-id="package_manage"
+          class="operate-item add-veriosn"
+          :class="{ 'is-disabled': !permission }"
           :permission="permission"
-          :resource="dbType">
-          <div
-            class="operate-item add-veriosn"
-            @click.stop="handleAddVersion">
-            {{ t('添加版本') }}
-          </div>
+          :resource="dbType"
+          @click.stop="handleAddVersion">
+          {{ t('添加版本') }}
         </AuthTemplate>
         <AuthTemplate
           action-id="package_manage"
+          class="operate-item"
+          :class="{ 'is-disabled': !permission }"
           :permission="permission"
-          :resource="dbType">
-          <div
-            class="operate-item"
-            @click.stop="handleEditName">
-            {{ t('编辑系列') }}
-          </div>
+          :resource="dbType"
+          @click.stop="handleEditName">
+          {{ t('编辑系列') }}
         </AuthTemplate>
         <BkPopConfirm
           :confirm-config="{
@@ -65,7 +63,7 @@
             }"
             action-id="package_manage"
             class="operate-item"
-            :class="{ 'is-disabled': dbVersionListCount > 0 }"
+            :class="{ 'is-disabled': dbVersionListCount > 0 || !permission }"
             :permission="permission"
             :resource="dbType"
             @click.stop>
