@@ -169,10 +169,7 @@
           @click="() => handleEditDbVersion(row)">
           {{ t('编辑') }}
         </AuthButton>
-        <DownloadPackage
-          :data="row"
-          :db-type="dbType"
-          :permission="permission" />
+        <DownloadPackage :data="row" />
         <DeleteVersion
           :data="row"
           :db-type="dbType"
@@ -463,10 +460,7 @@
 
   // 版本号比较函数：比较 full_version 格式如 1.2.0.0.0.0，按段数值从高到低
   const compareVersion = (versionA: string, versionB: string): number => {
-    const segCmp = compareSegmentsDesc(
-      parseVersionSegments(versionA.trim()),
-      parseVersionSegments(versionB.trim()),
-    );
+    const segCmp = compareSegmentsDesc(parseVersionSegments(versionA.trim()), parseVersionSegments(versionB.trim()));
     if (segCmp !== 0) {
       return segCmp;
     }

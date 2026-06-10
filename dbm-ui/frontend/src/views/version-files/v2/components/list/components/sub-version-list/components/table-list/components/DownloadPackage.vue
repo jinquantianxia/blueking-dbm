@@ -1,16 +1,13 @@
 <template>
-  <AuthButton
-    action-id="package_manage"
+  <BkButton
     class="ml-12"
     :loading="downloadSinglePackageLoading"
-    :permission="permission"
-    :resource="dbType"
     size="small"
     text
     theme="primary"
     @click="handleDownloadClick">
     {{ t('下载') }}
-  </AuthButton>
+  </BkButton>
   <BkDialog
     v-model:is-show="isShow"
     class="download-package-dialog"
@@ -60,8 +57,6 @@
 
   interface Props {
     data: DbVersionModel;
-    dbType: string;
-    permission: boolean;
   }
 
   const props = defineProps<Props>();
