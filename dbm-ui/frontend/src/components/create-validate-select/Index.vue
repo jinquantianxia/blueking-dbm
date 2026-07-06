@@ -280,9 +280,9 @@
   };
 
   const handleBlurInput = () => {
-    selectRef.value!.hidePopover();
-    selectRef.value!.isFocus = false;
     setTimeout(async () => {
+      selectRef.value!.hidePopover();
+      selectRef.value!.isFocus = false;
       if (isInputOrSelectValueChanged) {
         isInputOrSelectValueChanged = false;
         return;

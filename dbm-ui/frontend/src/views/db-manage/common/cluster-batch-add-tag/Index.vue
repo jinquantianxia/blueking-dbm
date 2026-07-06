@@ -51,23 +51,24 @@
             <span>{{ t('受影响集群') }}</span>
             【
             <I18nT
-              keypath="共n个"
+              keypath="共 n 个，添加 x 个，跳过 y 个"
               tag="span">
-              <span style="color: #3a84ff">{{ selectedClusters.length - filterClusterIds.length }}</span>
+              <template #n>
+                <span>{{ selectedClusters.length }}</span>
+              </template>
+              <template #x>
+                <span>{{ selectedClusters.length - filterClusterIds.length }}</span>
+              </template>
+              <template #y>
+                <span>{{ filterClusterIds.length }}</span>
+              </template>
             </I18nT>
             】
-          </div>
-          <div
-            v-if="filterClusterIds.length"
-            class="skip-tag-main">
-            <BkAlert
-              theme="warning"
-              :title="t('已自动跳过 n 个集群：包含同名标签键', { n: filterClusterIds.length })" />
           </div>
           <div class="cluster-list-main">
             <template v-if="validClusters.length">
               <div
-                v-for="item in validClusters"
+                v-for="item in selectedClusters"
                 :key="item.id"
                 class="cluster-item">
                 <div
@@ -80,6 +81,20 @@
                   style="font-size: 14px"
                   type="copy"
                   @click="() => execCopy(item.masterDomain)" />
+                <BkTag
+                  v-if="filterClusterIds.includes(item.id)"
+                  class="status-icon"
+                  size="small">
+                  {{ t('跳过') }}
+                </BkTag>
+                <BkTag
+                  v-else
+                  class="status-icon"
+                  size="small"
+                  theme="success">
+                  {{ t('添加') }}
+                </BkTag>
+
                 <!-- <DbIcon
                   class="operate-icon ml-6"
                   style="font-size: 18px"
