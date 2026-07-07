@@ -27,7 +27,7 @@
             extCls: popoverOptionsExtCls,
           }"
           v-bind="$attrs"
-          @change="handleChange">
+          @change="(value) => handleChange(value)">
           <template #trigger>
             <div
               class="create-validate-select-trigger"
@@ -180,7 +180,7 @@
 
       inputValue.value = options.find((item) => item.value === modelValue.value)?.label ?? '';
       // 不存在就新建一个选项
-      if (!inputValue.value) {
+      if (!inputValue.value && modelValue.value) {
         inputValue.value = modelValue.value as string;
         setTimeout(() => {
           handleBlurInput();
@@ -252,8 +252,37 @@
    * 悬浮第一个选项
    */
   const handleHoverFirstOption = () => {
-    const firstOption = selectRef.value?.contentRef?.querySelector('.bk-select-option') as HTMLElement | null;
-    firstOption?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    hoverOptionByIndex(0);
+  };
+
+  /**
+   * 将指定索引的选项滚动到可视区域
+   */
+  const scrollOptionIntoView = (index: number) => {
+    nextTick(() => {
+      const contentEl = selectRef.value?.contentRef;
+      if (!contentEl) {
+        return;
+      }
+
+      const optionEls = contentEl.querySelectorAll('.bk-select-option');
+      const targetOption = optionEls[index] as HTMLElement | undefined;
+      targetOption?.scrollIntoView({ block: 'nearest' });
+    });
+  };
+
+  /**
+   * 悬浮指定索引的选项
+   */
+  const hoverOptionByIndex = (index: number) => {
+    const contentEl = selectRef.value?.contentRef;
+    if (!contentEl) {
+      return;
+    }
+
+    const optionEls = contentEl.querySelectorAll('.bk-select-option');
+    const targetOption = optionEls[index] as HTMLElement | undefined;
+    targetOption?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
   };
 
   const handleAddNewOption = () => {
@@ -281,10 +310,15 @@
 
   const handleBlurInput = () => {
     setTimeout(async () => {
-      selectRef.value!.hidePopover();
-      selectRef.value!.isFocus = false;
+      // selectRef.value!.hidePopover();
+      // selectRef.value!.isFocus = false;
       if (isInputOrSelectValueChanged) {
         isInputOrSelectValueChanged = false;
+        return;
+      }
+
+      if (inputValue.value === modelValue.value) {
+        isExistdInList.value = true;
         return;
       }
 
@@ -397,32 +431,37 @@
   const handleChange = (value: T, isAutoChanged = true) => {
     isExistdInList.value = true;
     isInputOrSelectValueChanged = isAutoChanged;
-    handleValidate();
+    if (isAutoChanged) {
+      handleValidate();
+    }
     modelValue.value = value;
     const option = localList.value.find((item) => item.value === value);
     inputValue.value = option?.label ?? '';
     const isNew = !!option?.isNew;
     emits('change', value, isNew);
+    nextTick(() => {
+      isInputOrSelectValueChanged = false;
+    });
   };
 
   const handleKeyDown = (_value: string, e: KeyboardEvent) => {
     const currentIndex = localList.value.findIndex((item) => item.value === modelValue.value);
     if (e.key === 'ArrowDown') {
       if (currentIndex < localList.value.length - 1) {
-        const nextValue = localList.value[currentIndex + 1].value;
-        handleChange(nextValue as T, false);
+        const nextIndex = currentIndex + 1;
+        handleChange(localList.value[nextIndex].value as T, false);
+        scrollOptionIntoView(nextIndex);
       }
     }
 
     if (e.key === 'ArrowUp') {
-      if (currentIndex === 0) {
+      if (currentIndex <= 0) {
         return;
       }
 
-      if (currentIndex > 0) {
-        const prevValue = localList.value[currentIndex - 1].value;
-        handleChange(prevValue as T, false);
-      }
+      const prevIndex = currentIndex - 1;
+      handleChange(localList.value[prevIndex].value as T, false);
+      scrollOptionIntoView(prevIndex);
     }
   };
 
