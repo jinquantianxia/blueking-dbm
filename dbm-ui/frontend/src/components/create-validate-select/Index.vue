@@ -33,6 +33,7 @@
               class="create-validate-select-trigger"
               @click="handleTriggerClick">
               <BkInput
+                ref="inputRef"
                 v-model="inputValue"
                 :maxlength="maxLength"
                 :placeholder="placeholder"
@@ -146,6 +147,7 @@
 
   const formRef = ref<InstanceType<typeof BkForm>>();
   const selectRef = ref<InstanceType<typeof BkSelect>>();
+  const inputRef = ref<InstanceType<typeof BkInput>>();
   const inputValue = ref('');
   const localList = ref<SelectOption<T>[]>([]);
   const isExistdInList = ref(true);
@@ -168,6 +170,7 @@
 
   let localTotalList: SelectOption<T>[] = [];
   let isInputOrSelectValueChanged = false;
+  let currentIndex = -1;
 
   watch(
     () => props.options,
@@ -317,6 +320,13 @@
         return;
       }
 
+      // 输入框保持原样，高亮丢失
+      const currentOptionIndex = localList.value.findIndex((item) => item.label === modelValue.value);
+      if (currentIndex !== currentOptionIndex) {
+        currentIndex = currentOptionIndex;
+        return;
+      }
+
       if (inputValue.value === modelValue.value) {
         isExistdInList.value = true;
         return;
@@ -361,6 +371,14 @@
     }
 
     try {
+      const currentOptionIndex = localList.value.findIndex((item) => item.label === value);
+      if (currentIndex !== -1 && currentOptionIndex !== -1 && currentIndex !== currentOptionIndex) {
+        const option = localList.value[currentIndex];
+        modelValue.value = option.value as T;
+        emits('change', option.value as T, false);
+        return;
+      }
+
       const existOption = localList.value.find((item) => item.label === value);
       if (!value || existOption) {
         if (existOption) {
@@ -373,7 +391,8 @@
         return;
       }
 
-      if (localList.value.length) {
+      // 仅 1 条已有候选 → 选中该项；
+      if (localList.value.length && localList.value.length === 1) {
         const defaultOption = localList.value[0];
         modelValue.value = defaultOption.value as T;
         isExistdInList.value = true;
@@ -445,13 +464,16 @@
   };
 
   const handleKeyDown = (_value: string, e: KeyboardEvent) => {
-    const currentIndex = localList.value.findIndex((item) => item.value === modelValue.value);
+    if (currentIndex === -1) {
+      currentIndex = localList.value.findIndex((item) => item.label === modelValue.value);
+    }
     if (e.key === 'ArrowDown') {
       if (currentIndex < localList.value.length - 1) {
-        const nextIndex = currentIndex + 1;
-        handleChange(localList.value[nextIndex].value as T, false);
-        scrollOptionIntoView(nextIndex);
+        currentIndex = currentIndex + 1;
+        hoverOptionByIndex(currentIndex);
+        scrollOptionIntoView(currentIndex);
       }
+      return;
     }
 
     if (e.key === 'ArrowUp') {
@@ -459,9 +481,14 @@
         return;
       }
 
-      const prevIndex = currentIndex - 1;
-      handleChange(localList.value[prevIndex].value as T, false);
-      scrollOptionIntoView(prevIndex);
+      currentIndex = currentIndex - 1;
+      hoverOptionByIndex(currentIndex);
+      scrollOptionIntoView(currentIndex);
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      selectRef.value?.hidePopover();
     }
   };
 
