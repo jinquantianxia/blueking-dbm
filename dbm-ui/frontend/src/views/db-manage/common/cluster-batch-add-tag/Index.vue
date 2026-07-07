@@ -68,49 +68,41 @@
             <span class="ml-4 mr-4">)</span>
           </div>
           <div class="cluster-list-main">
-            <template v-if="validClusters.length">
+            <div
+              v-for="item in selectedClusters"
+              :key="item.id"
+              class="cluster-item">
               <div
-                v-for="item in selectedClusters"
-                :key="item.id"
-                class="cluster-item">
-                <div
-                  v-overflow-tips
-                  class="cluster-name"
-                  :class="{ 'is-skip': filterClusterIds.includes(item.id) }">
-                  {{ item.masterDomain }}
-                </div>
-                <DbIcon
-                  class="operate-icon"
-                  style="font-size: 14px"
-                  type="copy"
-                  @click="() => execCopy(item.masterDomain)" />
-                <BkTag
-                  v-if="filterClusterIds.includes(item.id)"
-                  class="status-icon"
-                  size="small">
-                  {{ t('跳过') }}
-                </BkTag>
-                <BkTag
-                  v-else
-                  class="status-icon"
-                  size="small"
-                  theme="success">
-                  {{ t('添加') }}
-                </BkTag>
+                v-overflow-tips
+                class="cluster-name"
+                :class="{ 'is-skip': filterClusterIds.includes(item.id) }">
+                {{ item.masterDomain }}
+              </div>
+              <DbIcon
+                class="operate-icon"
+                style="font-size: 14px"
+                type="copy"
+                @click="() => execCopy(item.masterDomain)" />
+              <BkTag
+                v-if="filterClusterIds.includes(item.id)"
+                class="status-icon"
+                size="small">
+                {{ t('跳过') }}
+              </BkTag>
+              <BkTag
+                v-else
+                class="status-icon"
+                size="small"
+                theme="success">
+                {{ t('添加') }}
+              </BkTag>
 
-                <!-- <DbIcon
+              <!-- <DbIcon
                   class="operate-icon ml-6"
                   style="font-size: 18px"
                   type="close"
                   @click="() => handleRemoveCluster(index)" /> -->
-              </div>
-            </template>
-            <BkException
-              v-else
-              class="exception-main"
-              scene="part"
-              :title="t('选中的集群均已包含同名标签键，无需操作')"
-              type="empty" />
+            </div>
           </div>
         </div>
       </template>
@@ -164,14 +156,6 @@
   /** 跳过的集群ID */
   const filterClusterIds = ref<number[]>([]);
   const isAbleToAddTags = ref(false);
-
-  const validClusters = computed(() => {
-    if (!filterClusterIds.value.length) {
-      return selectedClusters.value;
-    }
-
-    return selectedClusters.value.filter((item) => !filterClusterIds.value.includes(item.id));
-  });
 
   const { loading: confirmLoading, run: handleAddClusterTagKeys } = useRequest(addClusterTagKeys, {
     manual: true,
