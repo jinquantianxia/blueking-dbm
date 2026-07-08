@@ -317,7 +317,6 @@
   };
 
   const handleBlurInput = () => {
-    modelValue.value = inputValue.value as T;
     setTimeout(async () => {
       // selectRef.value!.hidePopover();
       // selectRef.value!.isFocus = false;
@@ -429,7 +428,7 @@
 
   const handleInputValue = (value: T) => {
     // isInputOrSelectValueChanged = true;
-    // modelValue.value = value;
+    modelValue.value = value;
     nextTick(async () => {
       if (!value) {
         localList.value = sortOptionList(_.cloneDeep(localTotalList));
