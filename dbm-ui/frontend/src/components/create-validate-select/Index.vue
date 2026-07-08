@@ -27,7 +27,8 @@
             extCls: popoverOptionsExtCls,
           }"
           v-bind="$attrs"
-          @change="(value) => handleChange(value)">
+          @change="(value) => handleChange(value)"
+          @toggle="handleTogglePopover">
           <template #trigger>
             <div
               class="create-validate-select-trigger"
@@ -316,7 +317,7 @@
   };
 
   const handleTriggerClick = (e: MouseEvent) => {
-    if (selectRef.value?.isFocus && selectRef.value?.isPopoverShow) {
+    if (selectRef.value?.isFocus || selectRef.value?.isPopoverShow) {
       e.stopPropagation();
       return;
     }
@@ -391,11 +392,13 @@
     }
 
     const currentOptionIndex = localList.value.findIndex((item) => item.label === value);
-    if (currentIndex !== -1 && currentIndex !== currentOptionIndex) {
+    if (currentOptionIndex !== -1 && currentIndex !== currentOptionIndex) {
       const option = localList.value[currentIndex];
       modelValue.value = option.value as T;
-      emits('change', option.value as T, false);
-      handleHidePopoverAndBlurInput();
+      nextTick(() => {
+        emits('change', option.value as T, false);
+        handleHidePopoverAndBlurInput();
+      });
       return;
     }
 
@@ -459,9 +462,9 @@
         return;
       }
 
-      currentIndex = localTotalList.findIndex((item) => item.label === value);
-      isExistdInList.value = currentIndex !== -1;
+      isExistdInList.value = localTotalList.find((item) => item.label === value);
       localList.value = filterAndSortOptionList(_.cloneDeep(localTotalList), String(value));
+      currentIndex = localList.value.findIndex((item) => item.label === value);
       if (localList.value.length === 1) {
         nextTick(() => {
           handleHoverFirstOption();
@@ -523,6 +526,19 @@
         selectRef.value?.hidePopover();
       }
     });
+  };
+
+  const handleTogglePopover = (isShow: boolean) => {
+    if (isShow) {
+      if (localList.value.length === 1) {
+        currentIndex = 0;
+      } else {
+        currentIndex = -1;
+        setTimeout(() => {
+          clearAllOptionHover();
+        }, 100);
+      }
+    }
   };
 
   defineExpose<Exposes<T>>({
