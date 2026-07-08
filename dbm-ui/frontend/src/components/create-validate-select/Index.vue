@@ -288,6 +288,21 @@
     targetOption?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
   };
 
+  /**
+   * 清除所有选项的悬浮态
+   */
+  const clearAllOptionHover = () => {
+    const contentEl = selectRef.value?.contentRef;
+    if (!contentEl) {
+      return;
+    }
+
+    const optionEls = contentEl.querySelectorAll('.bk-select-option');
+    optionEls.forEach((option) => {
+      option.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+    });
+  };
+
   const handleHidePopoverAndBlurInput = () => {
     selectRef.value?.hidePopover();
     inputRef.value?.blur();
@@ -376,8 +391,7 @@
     }
 
     const currentOptionIndex = localList.value.findIndex((item) => item.label === value);
-    if (currentIndex !== -1 && currentOptionIndex !== -1 && currentIndex !== currentOptionIndex) {
-      currentIndex = currentOptionIndex;
+    if (currentIndex !== -1 && currentIndex !== currentOptionIndex) {
       const option = localList.value[currentIndex];
       modelValue.value = option.value as T;
       emits('change', option.value as T, false);
@@ -385,7 +399,7 @@
       return;
     }
 
-    const existOption = localList.value.find((item) => item.label === value);
+    const existOption = localList.value[currentOptionIndex];
     if (!value || existOption) {
       if (existOption) {
         modelValue.value = existOption.value as T;
@@ -433,6 +447,7 @@
       if (!value) {
         localList.value = sortOptionList(_.cloneDeep(localTotalList));
         isExistdInList.value = true;
+        currentIndex = -1;
         return;
       }
 
@@ -440,14 +455,22 @@
       if (!isValid) {
         isExistdInList.value = true;
         localList.value = [];
+        currentIndex = -1;
         return;
       }
 
-      isExistdInList.value = localTotalList.some((item) => item.label === value);
+      currentIndex = localTotalList.findIndex((item) => item.label === value);
+      isExistdInList.value = currentIndex !== -1;
       localList.value = filterAndSortOptionList(_.cloneDeep(localTotalList), String(value));
-      nextTick(() => {
-        handleHoverFirstOption();
-      });
+      if (localList.value.length === 1) {
+        nextTick(() => {
+          handleHoverFirstOption();
+        });
+      } else {
+        nextTick(() => {
+          clearAllOptionHover();
+        });
+      }
     });
   };
 
@@ -468,34 +491,38 @@
   };
 
   const handleKeyDown = (_value: string, e: KeyboardEvent) => {
-    if (currentIndex === -1) {
-      currentIndex = localList.value.findIndex((item) => item.label === modelValue.value);
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (currentIndex < localList.value.length - 1) {
-        currentIndex = currentIndex + 1;
-        hoverOptionByIndex(currentIndex);
-        scrollOptionIntoView(currentIndex);
-      }
-      return;
-    }
-
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if (currentIndex <= 0) {
+    }
+
+    setTimeout(() => {
+      if (currentIndex === -1) {
+        currentIndex = localList.value.findIndex((item) => item.label === modelValue.value);
+      }
+      if (e.key === 'ArrowDown') {
+        if (currentIndex < localList.value.length - 1) {
+          currentIndex = currentIndex + 1;
+          hoverOptionByIndex(currentIndex);
+          scrollOptionIntoView(currentIndex);
+        }
         return;
       }
 
-      currentIndex = currentIndex - 1;
-      hoverOptionByIndex(currentIndex);
-      scrollOptionIntoView(currentIndex);
-      return;
-    }
+      if (e.key === 'ArrowUp') {
+        if (currentIndex === -1) {
+          return;
+        }
 
-    if (e.key === 'Tab') {
-      selectRef.value?.hidePopover();
-    }
+        currentIndex = currentIndex - 1;
+        hoverOptionByIndex(currentIndex);
+        scrollOptionIntoView(currentIndex);
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        selectRef.value?.hidePopover();
+      }
+    });
   };
 
   defineExpose<Exposes<T>>({
