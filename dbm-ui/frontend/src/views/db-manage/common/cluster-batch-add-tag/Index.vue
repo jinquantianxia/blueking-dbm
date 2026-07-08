@@ -191,7 +191,6 @@
     return new Promise((resolve) => {
       setTimeout(async () => {
         const tagsInfo = await tagOperationRef.value!.getValue();
-        console.log('tagsInfo !!!', tagsInfo);
         if (!tagsInfo) {
           isAbleToAddTags.value = false;
           resolve(null);

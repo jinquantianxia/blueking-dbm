@@ -288,10 +288,15 @@
     targetOption?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
   };
 
+  const handleHidePopoverAndBlurInput = () => {
+    selectRef.value?.hidePopover();
+    inputRef.value?.blur();
+  };
+
   const handleAddNewOption = () => {
     handleEnterInput(inputValue.value as T);
     nextTick(() => {
-      selectRef.value?.hidePopover();
+      handleHidePopoverAndBlurInput();
     });
   };
 
@@ -312,6 +317,7 @@
   };
 
   const handleBlurInput = () => {
+    modelValue.value = inputValue.value as T;
     setTimeout(async () => {
       // selectRef.value!.hidePopover();
       // selectRef.value!.isFocus = false;
@@ -370,61 +376,60 @@
       return;
     }
 
-    try {
-      const currentOptionIndex = localList.value.findIndex((item) => item.label === value);
-      if (currentIndex !== -1 && currentOptionIndex !== -1 && currentIndex !== currentOptionIndex) {
-        const option = localList.value[currentIndex];
-        modelValue.value = option.value as T;
-        emits('change', option.value as T, false);
-        return;
+    const currentOptionIndex = localList.value.findIndex((item) => item.label === value);
+    if (currentIndex !== -1 && currentOptionIndex !== -1 && currentIndex !== currentOptionIndex) {
+      currentIndex = currentOptionIndex;
+      const option = localList.value[currentIndex];
+      modelValue.value = option.value as T;
+      emits('change', option.value as T, false);
+      handleHidePopoverAndBlurInput();
+      return;
+    }
+
+    const existOption = localList.value.find((item) => item.label === value);
+    if (!value || existOption) {
+      if (existOption) {
+        modelValue.value = existOption.value as T;
+        emits('change', existOption.value as T, false);
       }
 
-      const existOption = localList.value.find((item) => item.label === value);
-      if (!value || existOption) {
-        if (existOption) {
-          modelValue.value = existOption.value as T;
-          emits('change', existOption.value as T, false);
-        }
-
-        localList.value = _.cloneDeep(localTotalList);
-        isExistdInList.value = true;
-        return;
-      }
-
-      // 仅 1 条已有候选 → 选中该项；
-      if (localList.value.length && localList.value.length === 1) {
-        const defaultOption = localList.value[0];
-        modelValue.value = defaultOption.value as T;
-        isExistdInList.value = true;
-        emits('change', defaultOption.value as T, false);
-        return;
-      }
-
-      const isValid = await handleValidate();
-      if (!isValid) {
-        return;
-      }
-
-      localNewList.unshift({
-        isNew: true,
-        label: String(value),
-        value: value as any,
-      });
-      localTotalList = [...props.options, ...localNewList];
       localList.value = _.cloneDeep(localTotalList);
       isExistdInList.value = true;
-      modelValue.value = value;
-      emits('change', value, true);
-    } finally {
-      nextTick(() => {
-        selectRef.value?.hidePopover();
-      });
+      handleHidePopoverAndBlurInput();
+      return;
     }
+
+    // 仅 1 条已有候选 → 选中该项；
+    if (localList.value.length && localList.value.length === 1) {
+      const defaultOption = localList.value[0];
+      modelValue.value = defaultOption.value as T;
+      isExistdInList.value = true;
+      emits('change', defaultOption.value as T, false);
+      handleHidePopoverAndBlurInput();
+      return;
+    }
+
+    const isValid = await handleValidate();
+    if (!isValid) {
+      return;
+    }
+
+    localNewList.unshift({
+      isNew: true,
+      label: String(value),
+      value: value as any,
+    });
+    localTotalList = [...props.options, ...localNewList];
+    localList.value = _.cloneDeep(localTotalList);
+    isExistdInList.value = true;
+    modelValue.value = value;
+    emits('change', value, true);
+    handleHidePopoverAndBlurInput();
   };
 
   const handleInputValue = (value: T) => {
     // isInputOrSelectValueChanged = true;
-    modelValue.value = value;
+    // modelValue.value = value;
     nextTick(async () => {
       if (!value) {
         localList.value = sortOptionList(_.cloneDeep(localTotalList));
@@ -468,6 +473,7 @@
       currentIndex = localList.value.findIndex((item) => item.label === modelValue.value);
     }
     if (e.key === 'ArrowDown') {
+      e.preventDefault();
       if (currentIndex < localList.value.length - 1) {
         currentIndex = currentIndex + 1;
         hoverOptionByIndex(currentIndex);
@@ -477,6 +483,7 @@
     }
 
     if (e.key === 'ArrowUp') {
+      e.preventDefault();
       if (currentIndex <= 0) {
         return;
       }
